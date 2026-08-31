@@ -7,12 +7,22 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from nr86.dataset import FrameDataset
-from nr86.models.student import build_student, count_params, save_student
+from nr86.models.student import build_student, count_params, load_student, save_student
 
 
 class TileTorchDataset(Dataset):
-    def __init__(self, root: Path, tile: int, epoch_tiles: int, seed: int = 0) -> None:
-        self.frames = FrameDataset(root, require_teacher=True)
+    def __init__(
+        self,
+        root: Path,
+        tile: int,
+        epoch_tiles: int,
+        seed: int = 0,
+        offset: int = 0,
+        max_frames: int | None = None,
+    ) -> None:
+        self.frames = FrameDataset(
+            root, require_teacher=True, offset=offset, max_frames=max_frames
+        )
         self.tile = tile
         self.epoch_tiles = epoch_tiles
         self.rng = np.random.default_rng(seed)
@@ -52,13 +62,27 @@ def train(
     batch: int = 4,
     lr: float = 2e-4,
     seed: int = 0,
+    resume: Path | None = None,
+    skip_eval: bool = False,
+    data_offset: int = 0,
+    data_frames: int | None = None,
 ) -> dict:
     from nr86.config import PRESETS
 
     spec = PRESETS[preset]
     device = pick_device()
-    model = build_student(spec).to(device)
-    ds = TileTorchDataset(data, tile=spec.tile, epoch_tiles=max(steps * batch, spec.tile), seed=seed)
+    if resume is not None and Path(resume).exists():
+        model = load_student(resume, map_location=device).to(device)
+    else:
+        model = build_student(spec).to(device)
+    ds = TileTorchDataset(
+        data,
+        tile=spec.tile,
+        epoch_tiles=max(steps * batch, spec.tile),
+        seed=seed,
+        offset=data_offset,
+        max_frames=data_frames,
+    )
     loader = DataLoader(ds, batch_size=batch, shuffle=False, num_workers=0)
     opt = torch.optim.AdamW(model.parameters(), lr=lr)
     use_amp = device.type == "cuda"
@@ -101,14 +125,15 @@ def train(
         __import__("json").dumps(meta, indent=2), encoding="utf-8"
     )
     print(f"saved {ckpt}  params={meta['params']}")
-    try:
-        from nr86.eval import evaluate
+    if not skip_eval:
+        try:
+            from nr86.eval import evaluate
 
-        ev = evaluate(ckpt, data, max_frames=min(8, len(ds.frames)))
-        meta["eval"] = ev
-        (out / "train.json").write_text(
-            __import__("json").dumps(meta, indent=2), encoding="utf-8"
-        )
-    except Exception as exc:
-        print(f"eval skipped: {exc}")
+            ev = evaluate(ckpt, data, max_frames=min(8, len(ds.frames)))
+            meta["eval"] = ev
+            (out / "train.json").write_text(
+                __import__("json").dumps(meta, indent=2), encoding="utf-8"
+            )
+        except Exception as exc:
+            print(f"eval skipped: {exc}")
     return meta

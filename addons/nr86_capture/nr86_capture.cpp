@@ -37,6 +37,12 @@ struct __declspec(uuid("a7e4c19d-6b52-4e08-9c31-0d86a2b5e7f1")) capture_state
 	std::vector<uint8_t> prev_bgr;
 	uint32_t prev_w = 0;
 	uint32_t prev_h = 0;
+	// Snapshot at reshade_begin_effects: live DS is often cleared by finish_effects.
+	std::vector<float> depth;
+	uint32_t depth_w = 0;
+	uint32_t depth_h = 0;
+	const char *depth_format = "none";
+	bool logged_depth = false;
 };
 
 static fs::path capture_root()
@@ -378,41 +384,14 @@ static void dump_frame(effect_runtime *runtime, resource back)
 	st.prev_h = h;
 
 	bool have_depth = false;
-	const char *df = "none";
-	uint32_t dw = 0, dh = 0;
-	if (generic_depth_data *gd = runtime->get_private_data<generic_depth_data>())
+	const char *df = st.depth_format ? st.depth_format : "none";
+	uint32_t dw = st.depth_w;
+	uint32_t dh = st.depth_h;
+	if (!st.depth.empty() && dw && dh)
 	{
-		if (gd->selected_depth_stencil.handle != 0)
-		{
-			const resource_desc dd = dev->get_resource_desc(gd->selected_depth_stencil);
-			dw = dd.texture.width;
-			dh = dd.texture.height;
-			df = depth_format_name(dd.texture.format);
-			resource dhost = {};
-			resource_usage src_state = gd->using_backup_texture ? resource_usage::shader_resource : resource_usage::depth_stencil;
-			if (copy_to_host(dev, queue, gd->selected_depth_stencil, src_state, dd, dhost))
-			{
-				subresource_data dm = {};
-				if (dev->map_texture_region(dhost, 0, nullptr, map_access::read_only, &dm))
-				{
-					std::vector<float> depth;
-					if (unpack_depth(dd.texture.format, dw, dh, static_cast<const uint8_t *>(dm.data), dm.row_pitch, depth))
-					{
-						std::ofstream raw(dir / "depth.f32", std::ios::binary);
-						raw.write(reinterpret_cast<const char *>(depth.data()), static_cast<std::streamsize>(depth.size() * 4));
-						have_depth = true;
-					}
-					else
-					{
-						char err[128];
-						std::snprintf(err, sizeof(err), "nr86: unsupported depth format %u (%s)", static_cast<unsigned>(dd.texture.format), df);
-						reshade::log::message(reshade::log::level::error, err);
-					}
-					dev->unmap_texture_region(dhost, 0);
-				}
-				dev->destroy_resource(dhost);
-			}
-		}
+		std::ofstream raw(dir / "depth.f32", std::ios::binary);
+		raw.write(reinterpret_cast<const char *>(st.depth.data()), static_cast<std::streamsize>(st.depth.size() * 4));
+		have_depth = raw.good();
 	}
 
 	std::ofstream meta(dir / "meta.json");
@@ -432,6 +411,79 @@ static void dump_frame(effect_runtime *runtime, resource back)
 	reshade::log::message(reshade::log::level::info, ("nr86: captured " + dir.string()).c_str());
 }
 
+static void snapshot_depth(effect_runtime *runtime)
+{
+	capture_state &st = *runtime->get_private_data<capture_state>();
+	generic_depth_data *gd = runtime->get_private_data<generic_depth_data>();
+	if (gd == nullptr)
+		return;
+	device *dev = runtime->get_device();
+	command_queue *queue = runtime->get_command_queue();
+	resource src = {};
+	resource_usage src_state = resource_usage::depth_stencil;
+	// Prefer the SRV Generic Depth binds to shaders (backup texture). The
+	// live DS is often cleared by reshade_finish_effects (all 1.0).
+	if (gd->selected_shader_resource.handle != 0)
+	{
+		src = dev->get_resource_from_view(gd->selected_shader_resource);
+		src_state = resource_usage::shader_resource;
+	}
+	else if (gd->selected_depth_stencil.handle != 0)
+	{
+		src = gd->selected_depth_stencil;
+		src_state = gd->using_backup_texture ? resource_usage::shader_resource : resource_usage::depth_stencil;
+	}
+	if (src.handle == 0)
+		return;
+	const resource_desc dd = dev->get_resource_desc(src);
+	const uint32_t dw = dd.texture.width;
+	const uint32_t dh = dd.texture.height;
+	const char *df = depth_format_name(dd.texture.format);
+	resource dhost = {};
+	if (!copy_to_host(dev, queue, src, src_state, dd, dhost))
+		return;
+	subresource_data dm = {};
+	if (!dev->map_texture_region(dhost, 0, nullptr, map_access::read_only, &dm))
+	{
+		dev->destroy_resource(dhost);
+		return;
+	}
+	std::vector<float> depth;
+	const bool ok = unpack_depth(
+		dd.texture.format, dw, dh, static_cast<const uint8_t *>(dm.data), dm.row_pitch, depth);
+	dev->unmap_texture_region(dhost, 0);
+	dev->destroy_resource(dhost);
+	if (!ok)
+	{
+		char err[128];
+		std::snprintf(err, sizeof(err), "nr86: unsupported depth format %u (%s)", static_cast<unsigned>(dd.texture.format), df);
+		reshade::log::message(reshade::log::level::error, err);
+		return;
+	}
+	st.depth.swap(depth);
+	st.depth_w = dw;
+	st.depth_h = dh;
+	st.depth_format = df;
+	if (!st.logged_depth && !st.depth.empty())
+	{
+		float mn = st.depth[0], mx = st.depth[0];
+		for (float v : st.depth)
+		{
+			if (v < mn)
+				mn = v;
+			if (v > mx)
+				mx = v;
+		}
+		char msg[160];
+		std::snprintf(
+			msg, sizeof(msg), "nr86: depth %ux%u %s min=%.4f max=%.4f backup=%d",
+			dw, dh, df, mn, mx, gd->using_backup_texture ? 1 : 0);
+		reshade::log::message(
+			mn == mx ? reshade::log::level::warning : reshade::log::level::info, msg);
+		st.logged_depth = true;
+	}
+}
+
 static void on_init(effect_runtime *runtime)
 {
 	runtime->create_private_data<capture_state>();
@@ -442,19 +494,34 @@ static void on_destroy(effect_runtime *runtime)
 	runtime->destroy_private_data<capture_state>();
 }
 
+static void on_begin_effects(effect_runtime *runtime, command_list *, resource_view, resource_view)
+{
+	capture_state &st = *runtime->get_private_data<capture_state>();
+	if (st.burst)
+		snapshot_depth(runtime);
+}
+
 static void on_present(effect_runtime *runtime, command_list *, resource_view rtv, resource_view)
 {
 	capture_state &st = *runtime->get_private_data<capture_state>();
 	device *dev = runtime->get_device();
 	const resource back = dev->get_resource_from_view(rtv);
 	if (runtime->is_key_pressed(VK_F10))
+	{
+		snapshot_depth(runtime);
 		dump_frame(runtime, back);
+	}
 	if (runtime->is_key_pressed(VK_F9))
 	{
 		st.burst = !st.burst;
 		reshade::log::message(
 			reshade::log::level::info,
 			st.burst ? "nr86: burst ON (mvec)" : "nr86: burst OFF");
+		if (st.burst)
+		{
+			st.logged_depth = false;
+			snapshot_depth(runtime);
+		}
 	}
 	if (st.burst)
 		dump_frame(runtime, back);
@@ -470,6 +537,7 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE addon_module, HMODULE re
 		return false;
 	reshade::register_event<reshade::addon_event::init_effect_runtime>(on_init);
 	reshade::register_event<reshade::addon_event::destroy_effect_runtime>(on_destroy);
+	reshade::register_event<reshade::addon_event::reshade_begin_effects>(on_begin_effects);
 	reshade::register_event<reshade::addon_event::reshade_finish_effects>(on_present);
 	return true;
 }

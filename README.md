@@ -15,13 +15,13 @@ INT8 / INT4 / 2:4 sparsity are **roadmap**, not implementation.
 | Piece | Status |
 | --- | --- |
 | Hardware doctor (sm, VRAM, FP8/INT8/sparsity) | working |
-| Capture → ingest (first-frame `prev_color: null` is valid) | working |
-| Self-teacher (Lanczos + depth punch / cheap + mvec smear) | working — still synthetic |
-| PSNR/SSIM eval vs teacher **and** identity | working (`nr86 eval`) |
+| Capture → ingest (`nr86 from-dump`; first-frame `prev_color: null` is valid) | working — 32-bit and 64-bit addons |
+| Self-teacher (Lanczos + depth punch / cheap + mvec smear) | working — still a resample teacher |
+| PSNR/SSIM eval vs teacher **and** identity | working (`nr86 eval`, `--use-trt`, `--offset`) |
 | Residual-after-warp mask; skip-frame + dirty-tile runtime | working — measured tiles + ms |
 | Placement: average **and** worst-case | **cost model**, not measured |
-| Residual UNet (`gn` FP16 / `none` reserved for later INT8) | working |
-| TensorRT-RTX FP16 bench | path exists; needs the SDK |
+| Residual UNet (`gn` FP16 / `none` reserved for later INT8) | working — smoke only |
+| TensorRT-RTX FP16 student in `run_frame` | working on this 3090 |
 | INT8 QDQ / INT4 / 2:4 / RTXNS | **not implemented** |
 
 Pulled in as git submodules / vendored headers (open or official only):
@@ -32,6 +32,23 @@ Pulled in as git submodules / vendored headers (open or official only):
 
 Not pulled: leaked `nvngx_dlssnr.dll`, Discord Ampere addons, DLSS5-Feeder, OptiScaler.
 See [LEGAL.md](LEGAL.md).
+
+## Measured on this 3090 (honest)
+
+**Synth** (24 frames, 512², smoke 193k): identity 22.21 → 25.79 dB, **+3.58 dB**.
+Hybrid skip+dirty holds that after the warp-without-mask bug (−2.06 dB).
+PyTorch full-frame ~10 ms. TRT skip+dirty **6.48 ms**. CLI 5.35 ms at 858×482
+had H2D/D2H **disabled** — do not quote it as a full pass.
+
+**Deus Ex: Human Revolution** (1920×1080 dump → 1280×720 teach, HUD on):
+synth weights **−8.76 dB**. Same-scene train/eval with no depth **+2.16 dB** —
+that did not hold out (−2.16 dB) once Generic Depth was a real buffer.
+Smoke trained on a depth dump, last-32 hold-out **+0.50 dB** at 3200 steps.
+A later Sarif HQ lobby burst (unseen room) **+1.55 dB** full-frame /
+**+1.14 dB** skip+dirty. Zeroing depth on that room is **−3.96 dB**.
+720p TRT `run_frame` skip+dirty **14.3 ms** (copies on) vs PyTorch 24.8 ms.
+Student-only TRT **11.4 ms**. None of those are under the ~10.7 ms line
+(that line was eager PyTorch at 858×482).
 
 ## Quick start (this machine: 3090, 24 GB, sm_86)
 
@@ -46,6 +63,7 @@ python -m nr86 eval --ckpt runs/smoke/student.pt --data datasets/synth --every-n
 python -m nr86 bench --ckpt runs/smoke/student.pt --size 1280x720 --try-trt
 python -m nr86 bench --ckpt runs/smoke/student.pt --data datasets/synth --every-n 2 --dirty-tiles --use-trt
 python -m nr86 from-dump --src "D:\Games\SomeGame\nr86_capture" --ckpt runs\overnight\smoke200\student.pt --use-trt
+python -m nr86 eval --ckpt runs\dxhr-smoke200\student.pt --data datasets\q720-dxhr --offset 200
 python -m nr86 place --preset ampere --size 1920x1080
 ```
 
@@ -58,13 +76,14 @@ python -m nr86 place --preset ampere --size 1920x1080
 | Existing 30xx addon | This project |
 | --- | --- |
 | Makes Blackwell cubins *run* on sm_86 | Makes a student *fast* on sm_86 |
-| Approx-FP16 of an FP8 148M teacher | Intended INT8 later; today FP16 PyTorch |
-| Full-frame, every frame, post-upscale | Internal res, mask, every 2nd frame, tiles |
-| Driver JIT of patched PTX | Your ONNX → TensorRT-RTX (when the SDK is there) |
+| Approx-FP16 of an FP8 148M teacher | Intended INT8 later; today FP16 |
+| Full-frame, every frame, post-upscale | Internal res, mask, every 2nd frame |
+| Driver JIT of patched PTX | Your ONNX → TensorRT-RTX |
 
 24 GB VRAM is the one thing that does not suck: a 148M teacher plus
 activations fits. Distilling a 20–40M student on one 3090 is a week, not a
-cluster. The smoke preset is minutes.
+cluster. The smoke preset is minutes. **Do not grow width.** Held-out DXHR
+clears +0.25 dB; 720p `run_frame` TRT does not yet beat ~10.7 ms.
 
 ## Repo layout
 
@@ -76,18 +95,11 @@ third_party/          TensorRT-RTX, RTXNS, ReShade headers
 docs/                 architecture + measurement protocol
 ```
 
-## Next (defensible result, not another DLL drop)
+## Next
 
-1. One offline title, HUD off, **F9 burst**. Then `nr86 from-dump`.
-2. `eval` must beat identity on that capture. Ablate RGB / depth / mvec.
-3. Only then QDQ INT8 on `ampere_int8`. Postpone INT4, 2:4, and RTXNS.
+Keep smoke. Cut the Python `run_frame` HWC round-trip so 720p TRT can
+approach the student-only 11.4 ms. INT8 / Ampere / width growth stay off
+until a 720p `run_frame` mean (copies on) is under the ~10.7 ms line.
+Another quiet lobby F9 will not teach much; harder motion would.
 
-TRT-RTX FP16 is already wired (`eval --use-trt`, `bench --use-trt`). Synth skip+dirty
-on this 3090 is **6.48 ms** at 512² and **+3.58 dB** vs identity — still not a
-real-game number.
-
-The milestone that turns this from a scaffold into systems research:
-**this student beats identity on real captures and runs in X ms on a 3090.**
-
-Do not grow toward 20–40M until the quality gate passes. Do not put this
-on multiplayer.
+Do not put this on multiplayer.

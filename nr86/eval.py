@@ -30,6 +30,7 @@ def evaluate(
     ablate: str = "none",
     use_trt: bool = False,
     engine: Path | None = None,
+    offset: int = 0,
 ) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     backend = "pytorch"
@@ -40,7 +41,7 @@ def evaluate(
         from nr86.trt_student import load_trt_student
 
         probe = FrameDataset(data, require_teacher=True)
-        fr0 = load_frame(probe.root, probe.rows[0])
+        fr0 = load_frame(probe.root, probe.rows[min(max(0, int(offset)), len(probe) - 1)])
         h, w = fr0.color.shape[:2]
         engine_path = engine or ensure_engine(ckpt, h, w)
         model = load_trt_student(engine_path, ckpt)
@@ -50,7 +51,8 @@ def evaluate(
         engine_path = None
     spec = model.spec
     ds = FrameDataset(data, require_teacher=True)
-    n = min(len(ds), max_frames)
+    start = max(0, int(offset))
+    n = min(max(0, len(ds) - start), max_frames)
     id_psnr: list[float] = []
     st_psnr: list[float] = []
     id_ssim: list[float] = []
@@ -63,7 +65,7 @@ def evaluate(
     prev_out: np.ndarray | None = None
 
     for i in range(n):
-        frame = load_frame(ds.root, ds.rows[i])
+        frame = load_frame(ds.root, ds.rows[start + i])
         packed = apply_ablation(pack_input(frame), ablate)
         x = torch.from_numpy(packed).unsqueeze(0).to(device)
         pred, stats = run_frame(
@@ -96,6 +98,7 @@ def evaluate(
         "ckpt": str(ckpt),
         "data": str(data),
         "frames": n,
+        "offset": start,
         "every_n": every_n,
         "dirty_tiles": dirty_tiles,
         "ablate": ablate,

@@ -1,0 +1,781 @@
+{
+  "preset": "smoke",
+  "train_frames": 105,
+  "eval_offset": 105,
+  "eval_frames": 32,
+  "chunk": 200,
+  "min_gain_db": 0.02,
+  "total_steps": 3400,
+  "peak_steps": 3200,
+  "best_delta_psnr": 0.495,
+  "best_ckpt": "B:\\Rando Apps\\Nvda DLSS5 workaround\\runs\\dxhr-depth-smoke\\student_best.pt",
+  "stop_reason": "plateau: last 2 chunks gained under 0.02 dB (hold-out +0.474, best +0.495)",
+  "history": [
+    {
+      "steps": 200,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.446,
+        "delta_psnr": -0.605,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.43,
+        "delta_psnr": -0.62,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.324,
+        "delta_psnr": -0.726,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 31.372,
+        "delta_psnr": -0.707,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 400,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.736,
+        "delta_psnr": -0.314,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.718,
+        "delta_psnr": -0.333,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.526,
+        "delta_psnr": -0.524,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 32.068,
+        "delta_psnr": -0.012,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 600,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.859,
+        "delta_psnr": -0.192,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.84,
+        "delta_psnr": -0.21,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.57,
+        "delta_psnr": -0.481,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 32.279,
+        "delta_psnr": 0.2,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 800,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.055,
+        "delta_psnr": 0.005,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.035,
+        "delta_psnr": -0.015,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.702,
+        "delta_psnr": -0.349,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 32.732,
+        "delta_psnr": 0.652,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 1000,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.188,
+        "delta_psnr": 0.138,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.166,
+        "delta_psnr": 0.116,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.795,
+        "delta_psnr": -0.256,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 32.882,
+        "delta_psnr": 0.802,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 1200,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.21,
+        "delta_psnr": 0.159,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.187,
+        "delta_psnr": 0.137,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 25.901,
+        "delta_psnr": -0.15,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 32.865,
+        "delta_psnr": 0.786,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 1400,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.239,
+        "delta_psnr": 0.188,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.216,
+        "delta_psnr": 0.166,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.034,
+        "delta_psnr": -0.016,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 32.89,
+        "delta_psnr": 0.811,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 1600,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.275,
+        "delta_psnr": 0.225,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.252,
+        "delta_psnr": 0.202,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.135,
+        "delta_psnr": 0.084,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 32.934,
+        "delta_psnr": 0.854,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 1800,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.318,
+        "delta_psnr": 0.267,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.294,
+        "delta_psnr": 0.244,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.173,
+        "delta_psnr": 0.123,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 32.99,
+        "delta_psnr": 0.91,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 2000,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.365,
+        "delta_psnr": 0.314,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.341,
+        "delta_psnr": 0.29,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.17,
+        "delta_psnr": 0.119,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 33.109,
+        "delta_psnr": 1.029,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 2200,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.405,
+        "delta_psnr": 0.354,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.38,
+        "delta_psnr": 0.33,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.151,
+        "delta_psnr": 0.101,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 33.102,
+        "delta_psnr": 1.022,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 2400,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.411,
+        "delta_psnr": 0.36,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.386,
+        "delta_psnr": 0.335,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.033,
+        "delta_psnr": -0.018,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 33.217,
+        "delta_psnr": 1.138,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 2600,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.475,
+        "delta_psnr": 0.424,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.449,
+        "delta_psnr": 0.399,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.128,
+        "delta_psnr": 0.078,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 33.27,
+        "delta_psnr": 1.191,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 2800,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.447,
+        "delta_psnr": 0.397,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.423,
+        "delta_psnr": 0.372,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.057,
+        "delta_psnr": 0.007,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 33.423,
+        "delta_psnr": 1.343,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 3000,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.526,
+        "delta_psnr": 0.476,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.501,
+        "delta_psnr": 0.45,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.1,
+        "delta_psnr": 0.049,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 33.534,
+        "delta_psnr": 1.454,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 3200,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.545,
+        "delta_psnr": 0.495,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.52,
+        "delta_psnr": 0.469,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.035,
+        "delta_psnr": -0.015,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 33.643,
+        "delta_psnr": 1.563,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    },
+    {
+      "steps": 3400,
+      "holdout_full": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.524,
+        "delta_psnr": 0.474,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.499,
+        "delta_psnr": 0.448,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 26.05,
+        "student_psnr": 26.112,
+        "delta_psnr": 0.062,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 32.079,
+        "student_psnr": 33.644,
+        "delta_psnr": 1.564,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    }
+  ],
+  "status": "done"
+}

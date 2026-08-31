@@ -267,6 +267,8 @@ def bench_sequence(
         "vram_mb": vram,
         "note": (
             f"{backend} student with actual skip-frame and dirty-tile execution. "
-            "mean_ms is per frame. tiles_executed is over one pass of the sequence."
+            "mean_ms is per frame from CUDA events around run_frame. "
+            "packed inputs are already on GPU; run_frame still copies color/mvec "
+            "from numpy and D2Hs the RGB out. Not tensorrt_rtx.exe with transfers off."
         ),
     }

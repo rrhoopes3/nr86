@@ -1,0 +1,40 @@
+{
+  "ckpt": "runs/dxhr-depth-smoke/student.pt",
+  "engine": "engines/student_1280x720_066e098e4d.engine",
+  "engine_bytes": 2448764,
+  "data": "datasets/q720-dxhr-room2",
+  "size": "1280x720",
+  "copies": "run_frame H2D color/mvec + D2H rgb; packed already on GPU; TrtStudent uses a non-default CUDA stream. Not tensorrt_rtx.exe with transfers off.",
+  "eval_trt_fullframe": {
+    "identity_psnr": 32.242,
+    "student_psnr": 33.788,
+    "delta_psnr": 1.547,
+    "gate": "pass",
+    "backend": "tensorrt_rtx"
+  },
+  "eval_trt_skip_dirty": {
+    "identity_psnr": 32.242,
+    "student_psnr": 33.385,
+    "delta_psnr": 1.143,
+    "paths": {
+      "fullframe": 16,
+      "warp_clean": 9,
+      "fullframe_dirty": 7
+    },
+    "gate": "pass",
+    "backend": "tensorrt_rtx"
+  },
+  "pytorch_student_only_1280x720_mean_ms": 22.602,
+  "trt_student_only_1280x720_mean_ms": 11.447,
+  "pytorch_run_frame_full_mean_ms": 30.534,
+  "trt_run_frame_full_mean_ms": 21.388,
+  "pytorch_run_frame_skip_dirty_mean_ms": 24.77,
+  "trt_run_frame_skip_dirty_mean_ms": 14.251,
+  "pytorch_eager_858x482_fullframe_mean_ms": 11.167,
+  "eager_note": "bench --size 1280x720 uses placement scaling 0.67, so that eager number is 858x482, not the 720p student tensor.",
+  "beats_pytorch_student_only": true,
+  "beats_pytorch_run_frame": true,
+  "under_10_7_ms": false,
+  "latency_gate": "fail: TRT run_frame 720p is 21.4 ms full / 14.3 ms skip+dirty. Student-only TRT is 11.4 ms. None are under the 10.7 ms PyTorch full-frame line (that line was 858x482 eager).",
+  "do_not": ["ampere400", "int8_qdq", "grow_width"]
+}

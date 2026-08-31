@@ -20,6 +20,7 @@ def from_dump(
     every_n: int = 2,
     dirty_tiles: bool = True,
     use_trt: bool = False,
+    eval_offset: int = 0,
 ) -> dict:
     src = Path(src)
     report = inspect_capture(src)
@@ -34,6 +35,7 @@ def from_dump(
         every_n=every_n,
         dirty_tiles=dirty_tiles,
         use_trt=use_trt,
+        offset=eval_offset,
     )
     out = {
         "inspect": {k: report[k] for k in ("frames", "ok", "color_formats", "depth_ok", "prev_color_frames") if k in report},

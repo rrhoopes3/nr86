@@ -1,0 +1,15 @@
+{
+  "title": "DXHR hold-out burst after Generic Depth backup copy",
+  "frames": 137,
+  "depth": "d24_unorm varying (backup=1, min~0.92 max~0.98)",
+  "ckpt": "runs/dxhr-smoke200/student.pt",
+  "identity_psnr": 32.079,
+  "eval": {
+    "fullframe_pytorch": {"delta_psnr": -2.164, "gate": "fail"},
+    "skip_dirty_pytorch": {"delta_psnr": -2.222, "gate": "fail", "paths": {"fullframe": 16, "warp_clean": 7, "fullframe_dirty": 9}},
+    "ablate_depth": {"delta_psnr": -2.738},
+    "fullframe_trt": {"delta_psnr": -2.165, "gate": "fail"}
+  },
+  "mask_fill_mean": 0.127,
+  "lesson": "Depth capture works. Same-scene +2.16 dB does not hold out. Identity on this burst is already 32.1 dB. Train on this dump next if we want a depth-aware student; do not grow width."
+}

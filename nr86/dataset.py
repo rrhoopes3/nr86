@@ -135,11 +135,21 @@ def load_frame(root: Path, rec: dict) -> Frame:
 
 
 class FrameDataset:
-    def __init__(self, root: Path, require_teacher: bool = True) -> None:
+    def __init__(
+        self,
+        root: Path,
+        require_teacher: bool = True,
+        offset: int = 0,
+        max_frames: int | None = None,
+    ) -> None:
         self.root = Path(root)
         self.rows = load_manifest(self.root)
         if require_teacher:
             self.rows = [r for r in self.rows if rec_has_teacher(r)]
+        start = max(0, int(offset))
+        self.rows = self.rows[start:]
+        if max_frames is not None:
+            self.rows = self.rows[: max(0, int(max_frames))]
         if not self.rows:
             raise FileNotFoundError(f"no frames in {self.root}")
 

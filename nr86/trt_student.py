@@ -51,6 +51,7 @@ class TrtStudent(nn.Module):
         self.width = int(shape[-1])
         self._in: torch.Tensor | None = None
         self._out: torch.Tensor | None = None
+        self._stream = torch.cuda.Stream()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if x.ndim != 4:
@@ -66,9 +67,10 @@ class TrtStudent(nn.Module):
             self._ctx.set_tensor_address(self.input_name, self._in.data_ptr())
             self._ctx.set_tensor_address(self.output_name, self._out.data_ptr())
         self._in.copy_(x)
-        stream = torch.cuda.current_stream().cuda_stream
-        if not self._ctx.execute_async_v3(stream):
+        self._stream.wait_stream(torch.cuda.current_stream())
+        if not self._ctx.execute_async_v3(self._stream.cuda_stream):
             raise RuntimeError("TensorRT-RTX execute_async_v3 failed")
+        torch.cuda.current_stream().wait_stream(self._stream)
         return self._out
 
 

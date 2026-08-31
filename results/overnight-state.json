@@ -3,7 +3,7 @@
   "started": "2026-08-31T04:47:00Z",
   "tick": 12,
   "loop": "stopped",
-  "next": "dxhr_depth_redump",
+  "next": "gpu_resident_run_frame",
   "done": [
     "smoke200",
     "diagnose_skip_quality",
@@ -13,25 +13,30 @@
     "from_dump_cli",
     "capture_addon_built",
     "dxhr_first_dump",
-    "dxhr_smoke200"
+    "dxhr_smoke200",
+    "dxhr_depth_capture",
+    "dxhr_depth_holdout_train",
+    "dxhr_room2_eval",
+    "dxhr_trt_720p_copies_on"
   ],
-  "blocked_on": ["dxhr_depth_r24_g8_typeless"],
+  "blocked_on": [],
   "do_not": ["ampere400", "int8_qdq", "grow_width"],
-  "notes": "DXHR F9 dump ingested. Synth weights fail identity (-8.76 dB). Smoke trained on the dump passes (+2.16 dB). Depth still missing; HUD on; same-scene train/eval.",
-  "last_started": "2026-08-31T16:41:22Z",
-  "last_finished": "2026-08-31T16:48:42Z",
+  "notes": "Depth-aware smoke holds out on last-32 (+0.50 dB) and a new Sarif lobby room (+1.55 / +1.14 dB). 720p TRT run_frame skip+dirty is 14.3 ms with copies on — beats PyTorch, misses ~10.7 ms. Next is GPU-resident run_frame, not a bigger net.",
+  "last_started": "2026-08-31T17:53:00Z",
+  "last_finished": "2026-08-31T17:55:00Z",
   "findings": {
     "smoke200_delta_psnr": 3.584,
     "hybrid_skip_dirty_delta_psnr": 3.584,
-    "hybrid_skip_dirty_gate": "pass",
     "pytorch_fullframe_mean_ms": 10.044,
     "trt_skip_dirty_512_mean_ms": 6.484,
-    "beats_pytorch_fullframe_ms": true,
-    "tensorrt_fp16_858x482_mean_ms": 5.355,
-    "dxhr_synth_weights_delta_psnr": -8.755,
-    "dxhr_trained_delta_psnr": 2.157,
-    "dxhr_trained_skip_dirty_delta_psnr": 2.12,
-    "dxhr_trt_720p_cli_mean_ms": 9.293,
-    "lesson": "Real-game identity needs weights trained on that dump. Synth does not transfer. Next: depth-capable addon32 + new F9 burst."
+    "dxhr_same_scene_no_depth_delta_psnr": 2.157,
+    "dxhr_holdout_old_weights_delta_psnr": -2.164,
+    "dxhr_depth_holdout_delta_psnr": 0.495,
+    "dxhr_room2_delta_psnr": 1.546,
+    "dxhr_room2_skip_dirty_delta_psnr": 1.143,
+    "dxhr_room2_ablate_depth_delta_psnr": -3.959,
+    "trt_720p_student_only_mean_ms": 11.447,
+    "trt_720p_run_frame_skip_dirty_mean_ms": 14.251,
+    "under_10_7_ms": false
   }
 }

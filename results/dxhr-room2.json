@@ -1,0 +1,62 @@
+{
+  "scene": "DXHR Sarif HQ lobby (new F9, 10:42)",
+  "ckpt": "runs/dxhr-depth-smoke/student.pt",
+  "ckpt_steps": 3200,
+  "preset": "smoke",
+  "src": "datasets/_dxhr_room2",
+  "raw": "datasets/raw-dxhr-room2",
+  "taught": "datasets/q720-dxhr-room2",
+  "frames": 203,
+  "depth": {
+    "format": "d24_unorm",
+    "ok": 203,
+    "min": 0.9167,
+    "max": 1.0,
+    "far_plane_frames": 0,
+    "log": "backup=1 min=0.9439 max=0.9789"
+  },
+  "hud": "on (health, minimap, Sarif VO, M1 marker). DXHR cannot hide full HUD.",
+  "note": "Different room from the 105-frame train split. Leftover capture IDs 000203-000894 were not ingested.",
+  "eval": {
+    "fullframe_first32": {
+      "frames": 32,
+      "offset": 0,
+      "identity_psnr": 32.242,
+      "student_psnr": 33.788,
+      "delta_psnr": 1.546,
+      "beats_identity": true,
+      "gate": "pass"
+    },
+    "skip_dirty_first32": {
+      "frames": 32,
+      "offset": 0,
+      "every_n": 2,
+      "identity_psnr": 32.242,
+      "student_psnr": 33.384,
+      "delta_psnr": 1.143,
+      "paths": {
+        "fullframe": 16,
+        "warp_clean": 9,
+        "fullframe_dirty": 7
+      },
+      "beats_identity": true,
+      "gate": "pass"
+    },
+    "ablate_depth_first32": {
+      "frames": 32,
+      "offset": 0,
+      "delta_psnr": -3.959,
+      "beats_identity": false,
+      "gate": "fail"
+    },
+    "fullframe_last32": {
+      "frames": 32,
+      "offset": 171,
+      "identity_psnr": 28.519,
+      "student_psnr": 29.645,
+      "delta_psnr": 1.126,
+      "beats_identity": true,
+      "gate": "pass"
+    }
+  }
+}

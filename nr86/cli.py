@@ -37,6 +37,8 @@ def main(argv: list[str] | None = None) -> int:
     p_t.add_argument("--steps", type=int, default=40)
     p_t.add_argument("--batch", type=int, default=4)
     p_t.add_argument("--lr", type=float, default=2e-4)
+    p_t.add_argument("--resume", type=Path, default=None)
+    p_t.add_argument("--skip-eval", action="store_true")
 
     p_ev = sub.add_parser("eval", help="PSNR/SSIM vs teacher and vs identity")
     p_ev.add_argument("--ckpt", type=Path, required=True)
@@ -52,6 +54,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_ev.add_argument("--use-trt", action="store_true")
     p_ev.add_argument("--engine", type=Path, default=None)
+    p_ev.add_argument("--offset", type=int, default=0, help="Skip this many frames (hold-out start)")
 
     p_e = sub.add_parser("export", help="Export student ONNX")
     p_e.add_argument("--ckpt", type=Path, required=True)
@@ -107,6 +110,7 @@ def main(argv: list[str] | None = None) -> int:
     p_fd.add_argument("--every-n", type=int, default=2)
     p_fd.add_argument("--dirty-tiles", action="store_true", default=True)
     p_fd.add_argument("--use-trt", action="store_true")
+    p_fd.add_argument("--eval-offset", type=int, default=0, help="Hold-out: eval starts at this frame")
 
     p_tr = sub.add_parser("trt", help="Build TensorRT-RTX engine from ONNX")
     p_tr.add_argument("--onnx", type=Path, required=True)
@@ -146,7 +150,16 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "train":
         from nr86.train import train
 
-        train(args.data, args.out, args.preset, args.steps, args.batch, args.lr)
+        train(
+            args.data,
+            args.out,
+            args.preset,
+            args.steps,
+            args.batch,
+            args.lr,
+            resume=args.resume,
+            skip_eval=args.skip_eval,
+        )
         return 0
     if args.cmd == "eval":
         from nr86.eval import evaluate
@@ -160,6 +173,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             ablate=args.ablate,
             use_trt=args.use_trt,
             engine=args.engine,
+            offset=args.offset,
         )
         return 0
     if args.cmd == "export":
@@ -231,6 +245,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             every_n=args.every_n,
             dirty_tiles=args.dirty_tiles,
             use_trt=args.use_trt,
+            eval_offset=args.eval_offset,
         )
         return 0
     if args.cmd == "trt":

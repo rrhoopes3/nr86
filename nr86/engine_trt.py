@@ -6,6 +6,7 @@ strongly typed network, serialize engine, JIT on first execute.
 
 from __future__ import annotations
 
+import hashlib
 import re
 import shutil
 import subprocess
@@ -88,16 +89,23 @@ def _build_with_python(onnx_path: Path, engine_path: Path) -> Path:
     return engine_path
 
 
+def engine_path_for(ckpt: Path, height: int, width: int) -> Path:
+    """Engine filename includes a ckpt digest so stale HxW files are not reused."""
+    digest = hashlib.sha1(Path(ckpt).read_bytes()).hexdigest()[:10]
+    return Path("engines") / f"student_{width}x{height}_{digest}.engine"
+
+
 def ensure_engine(ckpt: Path, height: int, width: int) -> Path:
-    """Export ONNX and build a TRT-RTX engine for this HxW if missing."""
+    """Export ONNX and build a TRT-RTX engine for this ckpt + HxW if missing."""
     from nr86.export_onnx import export_onnx
 
+    ckpt = Path(ckpt)
     out_dir = Path("engines")
     out_dir.mkdir(parents=True, exist_ok=True)
-    engine_path = out_dir / f"student_{width}x{height}.engine"
+    engine_path = engine_path_for(ckpt, height, width)
     if engine_path.exists() and engine_path.stat().st_size > 0:
         return engine_path
-    onnx_path = out_dir / f"student_{width}x{height}.onnx"
+    onnx_path = engine_path.with_suffix(".onnx")
     export_onnx(ckpt, onnx_path, height, width)
     return build_engine(onnx_path, engine_path)
 
