@@ -6,26 +6,26 @@
   "tick": 2,
   "day_tick": 2,
   "max_ticks": 12,
-  "next": "smoke_int8_plateau",
+  "next": "shallower_or_combat_f9",
   "done": [
     "gpu_resident_run_frame",
     "cut_pixels_960x540_zeroshot",
     "retrain_q540",
-    "int8_qdq_first_cut"
+    "int8_qdq_first_cut",
+    "smoke_int8_plateau"
   ],
   "blocked_on": [],
-  "now_eligible": ["smoke_int8_plateau", "combat_f9"],
-  "do_not": ["ampere400", "grow_width", "shrink_below_960x540"],
-  "notes": "Day tick 2: QDQ export + hashed INT8 engines land. No new F9. smoke_int8 (no GN) transplant -4.57 dB, +400 steps still -0.36. QDQ on the working GN smoke builds in TRT-RTX but is slower than FP16 (6.60 vs 5.03) and misses +0.25 (hold-out +0.22, lobby skip +0.24). Next: plateau-train smoke_int8 at 960x540 until hold-out clears +0.25, then QDQ that graph. Do not grow width. Combat F9 still wanted.",
+  "now_eligible": ["shallower_net", "combat_f9"],
+  "do_not": ["ampere400", "grow_width", "shrink_below_960x540", "qdq_on_failed_nogn"],
+  "notes": "smoke_int8 plateaued at 3000 steps. Peak hold-out +0.192 at 2600 (fail +0.25). Lobby +0.637 / skip +0.465. No QDQ on that graph. GN FP16 at 960x540 remains the quality+latency pass (5.03 / 7.64, hold-out +0.42). Next lever is a shallower smoke (same width, fewer levels) or a combat F9. Do not grow width.",
   "findings": {
     "trt_resident_q540_fp16_mean_ms": 5.034,
     "trt_resident_q540_fp16_student_p95_ms": 7.642,
     "q540_retrain_holdout_delta": 0.421,
     "q540_retrain_room2_skip_delta": 1.224,
     "int8_gn_qdq_holdout_delta": 0.22,
-    "int8_gn_qdq_room2_skip_delta": 0.239,
     "int8_gn_qdq_mean_ms": 6.595,
-    "int8_gn_qdq_student_p95_ms": 9.06,
-    "smoke_int8_400_holdout_delta": -0.364
+    "smoke_int8_plateau_holdout_delta": 0.192,
+    "smoke_int8_plateau_room2_skip_delta": 0.465
   }
 }

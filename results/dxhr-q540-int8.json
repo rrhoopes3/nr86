@@ -7,10 +7,15 @@
     "skipped": 12,
     "init_holdout_delta_psnr": -4.571,
     "train_400_holdout_delta_psnr": -0.364,
-    "train_400_room2_full_delta_psnr": -0.182,
-    "train_400_room2_skip_delta_psnr": -0.285,
+    "plateau_steps": 3000,
+    "plateau_peak_steps": 2600,
+    "plateau_holdout_delta_psnr": 0.192,
+    "plateau_holdout_skip_delta_psnr": 0.176,
+    "plateau_room2_full_delta_psnr": 0.637,
+    "plateau_room2_skip_delta_psnr": 0.465,
     "gate": "fail",
-    "lesson": "Dropping GN is not a free INT8 prep. Transplant is unusable; 400 steps still lose to identity."
+    "qdq_skipped": true,
+    "lesson": "Dropping GN is not a free INT8 prep. Plateau peak +0.192 on hold-out (need +0.25). Lobby +0.64 / skip +0.47 is the easy room. No QDQ on this graph."
   },
   "qdq_on_gn_smoke": {
     "ckpt": "runs/dxhr-depth-smoke-q540/student_best.pt",
