@@ -1,0 +1,37 @@
+{
+  "scene": "DXHR Sarif factory warehouse combat (F9 13:15:57-13:16:05)",
+  "ckpt": "runs/dxhr-depth-smoke-q540/student_best.pt",
+  "engine": "engines/student_960x540_1ae115ab73.engine",
+  "src": "datasets/_dxhr_combat",
+  "raw": "datasets/raw-dxhr-combat",
+  "taught": "datasets/q540-dxhr-combat",
+  "frames": 237,
+  "ids": "000000-000236",
+  "leftover_not_ingested": "000237+",
+  "depth": {
+    "format": "d24_unorm",
+    "ok": 237,
+    "min": 0.0885,
+    "max": 1.0,
+    "mean_min": 0.3107,
+    "far_plane_frames": 0,
+    "log": "backup=1 min=0.0912 max=0.9773"
+  },
+  "hud": "on (125 HP, Pritchard VO, M1, HOSTILE, takedown prompts, XP). Third-person melee cut in the burst.",
+  "quality": {
+    "first32_full": {"identity_psnr": 31.032, "delta_psnr": -0.246, "mask_fill_mean": 0.18, "gate": "fail"},
+    "first32_skip_dirty": {"delta_psnr": -0.246, "paths": {"fullframe": 16, "fullframe_dirty": 16}, "gate": "fail"},
+    "last32_full": {"identity_psnr": 32.062, "delta_psnr": -0.3, "mask_fill_mean": 0.295, "gate": "fail"},
+    "last32_skip_dirty": {"delta_psnr": -0.3, "paths": {"fullframe": 16, "fullframe_dirty": 16}, "gate": "fail"}
+  },
+  "trt_skip_dirty": {
+    "mean_ms": 9.988,
+    "student_path_p95_ms": 11.084,
+    "executed_frac": 1.0,
+    "mask_fill_mean": 0.18,
+    "warp_clean": 0,
+    "latency_gate": "fail: skip+dirty mean 9.988 vs 8.333; student-path p95 11.084 vs 16.667 pass"
+  },
+  "lesson": "This is the scare the quiet lobby hid. Zero warp_clean frames. Student runs every frame (executed_frac 1.0). Quality goes negative. Mean misses 8.33 ms; student p95 still under 16.67. Lobby +1.2 dB / 5.03 ms does not survive a takedown + HOSTILE turn.",
+  "do_not": ["ampere400", "grow_width", "shrink_below_960x540"]
+}

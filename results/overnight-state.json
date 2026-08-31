@@ -6,24 +6,26 @@
   "tick": 4,
   "day_tick": 4,
   "max_ticks": 12,
-  "next": "combat_f9",
+  "next": "combat_holdout_or_wait",
   "done": [
     "gpu_resident_run_frame",
     "cut_pixels_960x540_zeroshot",
     "retrain_q540",
     "int8_qdq_first_cut",
     "smoke_int8_plateau",
-    "smoke_shallow_plateau"
+    "smoke_shallow_plateau",
+    "combat_f9_eval"
   ],
-  "blocked_on": ["combat_f9"],
-  "now_eligible": ["combat_f9"],
+  "blocked_on": [],
+  "now_eligible": ["train_with_combat_holdout"],
   "do_not": ["ampere400", "grow_width", "shrink_below_960x540", "qdq_on_failed_nogn"],
-  "notes": "Day tick 4: no new F9. Newest capture meta is still 10:43 (room2, IDs 000000-000202). Leftover 000203+ not ingested. Happy path unchanged: GN FP16 smoke 960x540. Next wake 45 min unless a combat burst lands.",
+  "notes": "Combat F9 ingested (237 frames, 13:15:57, backup=1, leftover 000237+ skipped). GN q540 student fails quality (-0.25 / -0.30) and skip+dirty mean (9.99 vs 8.33). Zero warp_clean. Student p95 11.08 still passes. Do not grow width. Next is optional: smoke retrain that includes some combat frames and holds out the last 32.",
   "findings": {
-    "trt_resident_q540_fp16_mean_ms": 5.034,
-    "q540_retrain_holdout_delta": 0.421,
-    "smoke_int8_plateau_holdout_delta": 0.192,
-    "smoke_shallow_plateau_holdout_delta": 0.089,
-    "newest_capture_meta": "2026-08-31T10:43:04"
+    "trt_resident_q540_fp16_lobby_mean_ms": 5.034,
+    "q540_lobby_skip_delta": 1.224,
+    "combat_first32_delta": -0.246,
+    "combat_last32_delta": -0.3,
+    "combat_trt_skip_dirty_mean_ms": 9.988,
+    "combat_executed_frac": 1.0
   }
 }
