@@ -3,10 +3,10 @@
   "started": "2026-08-31T18:37:00Z",
   "loop": "running",
   "loop_name": "nr86day",
-  "tick": 4,
-  "day_tick": 4,
+  "tick": 5,
+  "day_tick": 5,
   "max_ticks": 12,
-  "next": "combat_holdout_or_wait",
+  "next": "another_combat_f9",
   "done": [
     "gpu_resident_run_frame",
     "cut_pixels_960x540_zeroshot",
@@ -14,18 +14,29 @@
     "int8_qdq_first_cut",
     "smoke_int8_plateau",
     "smoke_shallow_plateau",
-    "combat_f9_eval"
+    "combat_f9_eval",
+    "combat_latency_paired_rebench",
+    "storm_mode",
+    "combat_retrain_hud_burst_holdout",
+    "int8_timing_only"
   ],
-  "blocked_on": [],
-  "now_eligible": ["train_with_combat_holdout"],
-  "do_not": ["ampere400", "grow_width", "shrink_below_960x540", "qdq_on_failed_nogn"],
-  "notes": "Combat F9 ingested (237 frames, 13:15:57, backup=1, leftover 000237+ skipped). GN q540 student fails quality (-0.25 / -0.30) and skip+dirty mean (9.99 vs 8.33). Zero warp_clean. Student p95 11.08 still passes. Do not grow width. Next is optional: smoke retrain that includes some combat frames and holds out the last 32.",
+  "blocked_on": ["another_combat_f9"],
+  "now_eligible": ["ingest_new_combat_burst_if_f9"],
+  "do_not": ["ampere400", "grow_width", "shrink_below_960x540"],
+  "do_not_quality_claim": ["qdq_on_failed_nogn"],
+  "notes": "Tick 5 done (Fable order). (1) Paired re-bench: every-n=1 lobby 11.46 vs combat 11.43 — 56% student gap was clocks. (2) Storm is in FrameRunner. (3) Combat HUD-mask retrain plateaued +0.039 first32 / +0.112 skip; room2 +1.49 and holdout last32 +0.446 held. Need another combat burst, not more steps on this 8s clip. Leftover 000237+ is not a hold-out. (4) INT8 timing-only: QDQ slower than FP16 on GN (6.55 vs 6.05) and no-GN (6.36 vs 5.11). No INT8 quality claims. If a new F9 exists, stage by meta.json mtime only. Else wait. Do not grow width.",
   "findings": {
     "trt_resident_q540_fp16_lobby_mean_ms": 5.034,
     "q540_lobby_skip_delta": 1.224,
-    "combat_first32_delta": -0.246,
-    "combat_last32_delta": -0.3,
-    "combat_trt_skip_dirty_mean_ms": 9.988,
-    "combat_executed_frac": 1.0
+    "combat_first32_delta_before": -0.246,
+    "combat_first32_delta_after_hud_retrain": 0.039,
+    "combat_skip_delta_after_hud_retrain": 0.112,
+    "combat_retrain_peak_steps": 400,
+    "room2_skip_after_combat_retrain": 1.493,
+    "holdout_last32_after_combat_retrain": 0.446,
+    "int8_slower_than_fp16_at_193k_540p": true,
+    "nogn_fp16_mean_ms": 5.105,
+    "nogn_int8_mean_ms": 6.361,
+    "leftover_000237_is_not_a_holdout": true
   }
 }

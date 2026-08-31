@@ -32,6 +32,7 @@ def evaluate(
     engine: Path | None = None,
     offset: int = 0,
     int8: bool = False,
+    storm: bool = True,
 ) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     backend = "pytorch"
@@ -70,6 +71,7 @@ def evaluate(
         tile=spec.tile,
         overlap=spec.overlap,
         dirty_tiles=dirty_tiles,
+        storm=storm,
     )
 
     for i in range(n):
@@ -101,6 +103,7 @@ def evaluate(
         "offset": start,
         "every_n": every_n,
         "dirty_tiles": dirty_tiles,
+        "storm": storm and dirty_tiles,
         "ablate": ablate,
         "backend": backend,
         "engine": str(engine_path) if engine_path else None,

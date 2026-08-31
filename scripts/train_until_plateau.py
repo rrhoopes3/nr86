@@ -55,6 +55,15 @@ def _parse() -> argparse.Namespace:
     p.add_argument("--chunk", type=int, default=CHUNK)
     p.add_argument("--max-steps", type=int, default=MAX_STEPS)
     p.add_argument("--preset", default="smoke")
+    p.add_argument("--extra", type=Path, default=None)
+    p.add_argument("--extra-frames", type=int, default=None)
+    p.add_argument("--hud-mask", choices=["none", "dxhr"], default="none")
+    p.add_argument(
+        "--eval-data",
+        type=Path,
+        default=None,
+        help="Hold-out dump (defaults to --data). Use a different burst, not last-N of train.",
+    )
     return p.parse_args()
 
 
@@ -63,6 +72,7 @@ def main() -> None:
     data = args.data
     out = args.out
     result = args.result
+    eval_data = args.eval_data or data
     train_frames = args.train_frames
     eval_offset = args.eval_offset
     eval_frames = args.eval_frames
@@ -120,15 +130,18 @@ def main() -> None:
             skip_eval=True,
             seed=seed,
             data_frames=train_frames,
+            extra=args.extra,
+            extra_frames=args.extra_frames,
+            hud_mask=args.hud_mask,
         )
         total += chunk
         ckpt = out / "student.pt"
         resume = ckpt
 
-        hold_full = evaluate(ckpt, data, max_frames=eval_frames, offset=eval_offset, every_n=1)
+        hold_full = evaluate(ckpt, eval_data, max_frames=eval_frames, offset=eval_offset, every_n=1)
         hold_skip = evaluate(
             ckpt,
-            data,
+            eval_data,
             max_frames=eval_frames,
             offset=eval_offset,
             every_n=2,
@@ -136,7 +149,7 @@ def main() -> None:
         )
         hold_nodepth = evaluate(
             ckpt,
-            data,
+            eval_data,
             max_frames=eval_frames,
             offset=eval_offset,
             every_n=1,
@@ -158,6 +171,9 @@ def main() -> None:
                 {
                     "preset": preset,
                     "data": str(data),
+                    "eval_data": str(eval_data),
+                    "extra": None if args.extra is None else str(args.extra),
+                    "hud_mask": args.hud_mask,
                     "out": str(out),
                     "train_frames": train_frames,
                     "eval_offset": eval_offset,
@@ -225,6 +241,9 @@ def main() -> None:
     payload = {
         "preset": preset,
         "data": str(data),
+        "eval_data": str(eval_data),
+        "extra": None if args.extra is None else str(args.extra),
+        "hud_mask": args.hud_mask,
         "out": str(out),
         "train_frames": train_frames,
         "eval_offset": eval_offset,

@@ -10,6 +10,9 @@ Control flow (do not invert):
 - Skip slot + dirty_tiles: warp, then consult the residual mask. Clean →
   warp only. Any dirty tile → full-frame student + composite. Never return
   warp-only *before* reading the mask.
+- Storm: if fill stays high for ``storm_k`` frames, drop warp/mask/composite
+  and run a bare full-frame student until a cheap luma-diff falls. Skip
+  apparatus is a tax when every frame is dirty.
 - Skip slot without dirty_tiles: warp only (explicit).
 
 CUDA ``FrameRunner`` keeps prev_color / prev_out on device, pins color/mvec
@@ -92,6 +95,10 @@ class FrameRunner:
         overlap: int,
         dirty_tiles: bool,
         tile_thresh: float = 0.02,
+        storm: bool = True,
+        storm_k: int = 3,
+        storm_fill: float = 0.10,
+        storm_luma: float = 0.02,
     ) -> None:
         self.model = model
         self.every_n = every_n
@@ -99,7 +106,13 @@ class FrameRunner:
         self.overlap = overlap
         self.dirty_tiles = dirty_tiles
         self.tile_thresh = tile_thresh
+        self.storm_enabled = storm
+        self.storm_k = storm_k
+        self.storm_fill = storm_fill
+        self.storm_luma = storm_luma
         self._have_prev = False
+        self._storm = False
+        self._high_fill_streak = 0
         self._n_tiles: int | None = None
         self._host_color: torch.Tensor | None = None
         self._host_mvec: torch.Tensor | None = None
@@ -112,6 +125,8 @@ class FrameRunner:
 
     def reset(self) -> None:
         self._have_prev = False
+        self._storm = False
+        self._high_fill_streak = 0
         self._prev_color_np = None
         self._prev_out_np = None
 
@@ -175,6 +190,41 @@ class FrameRunner:
         mvec: np.ndarray,
         frame_index: int,
     ) -> tuple[np.ndarray, ExecStats]:
+        pred, stats = self._run_cpu_stateful(
+            packed, color=color, mvec=mvec, frame_index=frame_index
+        )
+        self._prev_color_np = color
+        self._prev_out_np = pred
+        self._have_prev = True
+        return pred, stats
+
+    def _run_cpu_stateful(
+        self,
+        packed: torch.Tensor,
+        *,
+        color: np.ndarray,
+        mvec: np.ndarray,
+        frame_index: int,
+    ) -> tuple[np.ndarray, ExecStats]:
+        _n, _c, h, w = packed.shape
+        n_tiles = len(iter_tiles(h, w, self.tile, self.overlap))
+        luma = 0.0
+        if self._prev_color_np is not None:
+            luma = float(
+                np.mean(
+                    np.abs(color.mean(axis=2) - self._prev_color_np.mean(axis=2))
+                )
+            )
+        if self._storm and self._prev_out_np is not None:
+            if luma < self.storm_luma:
+                self._storm = False
+                self._high_fill_streak = 0
+            else:
+                pred = self.model(packed)[0].permute(1, 2, 0).cpu().numpy()
+                return np.clip(pred, 0.0, 1.0), ExecStats(
+                    n_tiles, n_tiles, True, 1.0, "storm"
+                )
+
         pred, stats = _run_frame_cpu(
             self.model,
             packed,
@@ -189,9 +239,13 @@ class FrameRunner:
             dirty_tiles=self.dirty_tiles,
             tile_thresh=self.tile_thresh,
         )
-        self._prev_color_np = color
-        self._prev_out_np = pred
-        self._have_prev = True
+        if self.storm_enabled and self.dirty_tiles:
+            if stats.mask_fill >= self.storm_fill:
+                self._high_fill_streak += 1
+            else:
+                self._high_fill_streak = 0
+            if self._high_fill_streak >= self.storm_k:
+                self._storm = True
         return pred, stats
 
     def _run_cuda(
@@ -210,10 +264,27 @@ class FrameRunner:
         n_tiles = int(self._n_tiles or 0)
         _blit_hwc_to_pinned(self._host_color, color)
         self._dev_color.copy_(self._host_color, non_blocking=True)
+        color_t = self._dev_color
+        luma = 0.0
+        if self._have_prev:
+            luma = float((color_t.mean(dim=1) - self._prev_color.mean(dim=1)).abs().mean().item())
+        if self._storm and self._have_prev:
+            if luma < self.storm_luma:
+                self._storm = False
+                self._high_fill_streak = 0
+            else:
+                pred = self.model(packed)
+                self._prev_color.copy_(color_t)
+                self._prev_out.copy_(pred)
+                self._have_prev = True
+                stats = ExecStats(n_tiles, n_tiles, True, 1.0, "storm")
+                if to_numpy:
+                    return nchw_to_hwc(pred), stats
+                return pred, stats
         _blit_hwc_to_pinned(self._host_mvec, mvec)
         self._dev_mvec.copy_(self._host_mvec, non_blocking=True)
-        color_t = self._dev_color
         mvec_t = self._dev_mvec
+
         warped_in = warp_nchw(self._prev_color, mvec_t) if self._have_prev else None
         warped_out = warp_nchw(self._prev_out, mvec_t) if self._have_prev else color_t
         mask = residual_mask_nchw(color_t, warped_in)
@@ -234,6 +305,14 @@ class FrameRunner:
             pred = self.model(packed)
             out = composite_nchw(pred, warped_out, mask) if self._have_prev else pred
             stats = ExecStats(n_tiles, n_tiles, True, fill, "fullframe")
+
+        if self.storm_enabled and self.dirty_tiles:
+            if fill >= self.storm_fill:
+                self._high_fill_streak += 1
+            else:
+                self._high_fill_streak = 0
+            if self._high_fill_streak >= self.storm_k:
+                self._storm = True
 
         self._prev_color.copy_(color_t)
         self._prev_out.copy_(out)

@@ -201,6 +201,37 @@ def test_frame_runner_holds_prev_on_cpu():
     assert net.calls == calls
 
 
+def test_storm_drops_warp_after_sustained_fill():
+    net = CountingNet()
+    runner = FrameRunner(
+        net,
+        every_n=2,
+        tile=8,
+        overlap=0,
+        dirty_tiles=True,
+        storm_k=3,
+        storm_fill=0.1,
+        storm_luma=0.02,
+    )
+    h = w = 16
+    depth = np.zeros((h, w), dtype=np.float32)
+    mvec = np.zeros((h, w, 2), dtype=np.float32)
+    paths: list[str] = []
+    for i in range(6):
+        color = np.full((h, w, 3), float(i % 2), dtype=np.float32)
+        x = _packed(color, depth, mvec)
+        _pred, stats = runner.run(x, color=color, mvec=mvec, frame_index=i)
+        paths.append(stats.path)
+    assert "storm" in paths
+    assert paths[-1] == "storm"
+    assert net.calls >= 1
+
+    still = np.full((h, w, 3), 1.0, dtype=np.float32)
+    x = _packed(still, depth, mvec)
+    _pred, stats = runner.run(x, color=still, mvec=mvec, frame_index=6)
+    assert stats.path != "storm"
+
+
 def test_ablation_zeros_channels():
     packed = np.ones((6, 4, 4), dtype=np.float32)
     rgb = apply_ablation(packed, "rgb")

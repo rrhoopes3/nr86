@@ -19,23 +19,37 @@ class TileTorchDataset(Dataset):
         seed: int = 0,
         offset: int = 0,
         max_frames: int | None = None,
+        extra: Path | None = None,
+        extra_frames: int | None = None,
+        hud: str = "none",
     ) -> None:
-        self.frames = FrameDataset(
-            root, require_teacher=True, offset=offset, max_frames=max_frames
-        )
+        from nr86.hud_mask import PRESETS as HUD_PRESETS
+
+        self.pools = [
+            FrameDataset(root, require_teacher=True, offset=offset, max_frames=max_frames)
+        ]
+        if extra is not None:
+            self.pools.append(
+                FrameDataset(extra, require_teacher=True, offset=0, max_frames=extra_frames)
+            )
+        weights = np.array([len(p) for p in self.pools], dtype=np.float64)
+        self.pool_p = weights / weights.sum()
         self.tile = tile
         self.epoch_tiles = epoch_tiles
         self.rng = np.random.default_rng(seed)
+        self.hud_boxes = HUD_PRESETS[hud]
 
     def __len__(self) -> int:
         return self.epoch_tiles
 
-    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
-        fi = int(self.rng.integers(0, len(self.frames)))
-        x_np, y_np = self.frames[fi]
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        from nr86.hud_mask import tile_keep
+
+        pool = self.pools[int(self.rng.choice(len(self.pools), p=self.pool_p))]
+        fi = int(self.rng.integers(0, len(pool)))
+        x_np, y_np = pool[fi]
         _c, h, w = x_np.shape
         if h < self.tile or w < self.tile:
-            # pad then take 0,0
             pad_h = max(0, self.tile - h)
             pad_w = max(0, self.tile - w)
             x_np = np.pad(x_np, ((0, 0), (0, pad_h), (0, pad_w)))
@@ -45,7 +59,8 @@ class TileTorchDataset(Dataset):
         x0 = int(self.rng.integers(0, w - self.tile + 1))
         x = x_np[:, y0 : y0 + self.tile, x0 : x0 + self.tile]
         y = y_np[:, y0 : y0 + self.tile, x0 : x0 + self.tile]
-        return torch.from_numpy(x), torch.from_numpy(y)
+        keep = tile_keep(h, w, y0, x0, self.tile, self.tile, self.hud_boxes)
+        return torch.from_numpy(x), torch.from_numpy(y), torch.from_numpy(keep)
 
 
 def pick_device() -> torch.device:
@@ -66,6 +81,9 @@ def train(
     skip_eval: bool = False,
     data_offset: int = 0,
     data_frames: int | None = None,
+    extra: Path | None = None,
+    extra_frames: int | None = None,
+    hud_mask: str = "none",
 ) -> dict:
     from nr86.config import PRESETS
 
@@ -82,6 +100,9 @@ def train(
         seed=seed,
         offset=data_offset,
         max_frames=data_frames,
+        extra=extra,
+        extra_frames=extra_frames,
+        hud=hud_mask,
     )
     loader = DataLoader(ds, batch_size=batch, shuffle=False, num_workers=0)
     opt = torch.optim.AdamW(model.parameters(), lr=lr)
@@ -92,16 +113,18 @@ def train(
     last_loss = 0.0
     for step in range(steps):
         try:
-            x, y = next(it)
+            x, y, keep = next(it)
         except StopIteration:
             it = iter(loader)
-            x, y = next(it)
+            x, y, keep = next(it)
         x = x.to(device, non_blocking=True)
         y = y.to(device, non_blocking=True)
+        keep = keep.to(device, non_blocking=True)
         opt.zero_grad(set_to_none=True)
         with torch.amp.autocast("cuda", enabled=use_amp, dtype=torch.float16):
             pred = model(x)
-            loss = torch.mean(torch.abs(pred - y))
+            err = torch.abs(pred - y) * keep.unsqueeze(1)
+            loss = err.sum() / keep.sum().clamp(min=1.0) / pred.shape[1]
         scaler.scale(loss).backward()
         scaler.step(opt)
         scaler.update()
@@ -129,7 +152,7 @@ def train(
         try:
             from nr86.eval import evaluate
 
-            ev = evaluate(ckpt, data, max_frames=min(8, len(ds.frames)))
+            ev = evaluate(ckpt, data, max_frames=min(8, len(ds.pools[0])))
             meta["eval"] = ev
             (out / "train.json").write_text(
                 __import__("json").dumps(meta, indent=2), encoding="utf-8"

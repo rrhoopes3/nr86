@@ -1,0 +1,425 @@
+{
+  "preset": "smoke",
+  "train": "combat_all + holdout_first105",
+  "hud_mask": "dxhr",
+  "data": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-combat",
+  "extra": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-holdout",
+  "out": "B:\\Rando Apps\\Nvda DLSS5 workaround\\runs\\dxhr-combat-hud",
+  "holdout": "room2 + holdout last32 (other bursts)",
+  "not_holdout": [
+    "combat last32 (same 8s burst)",
+    "leftover capture IDs 000237+"
+  ],
+  "total_steps": 800,
+  "best_combat_first32_delta": 0.039,
+  "best_ckpt": "B:\\Rando Apps\\Nvda DLSS5 workaround\\runs\\dxhr-combat-hud\\student_best.pt",
+  "stop_reason": "plateau: last 2 chunks gained under 0.02 dB (combat +0.032, best +0.039)",
+  "history": [
+    {
+      "combat_first32_full": {
+        "identity_psnr": 31.032,
+        "student_psnr": 30.785,
+        "delta_psnr": -0.246,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.18
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 32.062,
+        "student_psnr": 31.762,
+        "delta_psnr": -0.3,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.295
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 33.021,
+        "delta_psnr": 1.505,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 33.043,
+        "delta_psnr": 1.527,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 25.989,
+        "delta_psnr": 0.421,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.437,
+        "delta_psnr": 0.869,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662
+      },
+      "steps": 0,
+      "veto": null
+    },
+    {
+      "combat_first32_full": {
+        "identity_psnr": 31.032,
+        "student_psnr": 31.031,
+        "delta_psnr": -0.001,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.18
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 32.062,
+        "student_psnr": 31.872,
+        "delta_psnr": -0.19,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.295
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.699,
+        "delta_psnr": 1.184,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.73,
+        "delta_psnr": 1.214,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.002,
+        "delta_psnr": 0.434,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.469,
+        "delta_psnr": 0.901,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662
+      },
+      "steps": 200,
+      "veto": null
+    },
+    {
+      "combat_first32_full": {
+        "identity_psnr": 31.032,
+        "student_psnr": 31.07,
+        "delta_psnr": 0.039,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.18
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 32.062,
+        "student_psnr": 31.906,
+        "delta_psnr": -0.157,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.295
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.993,
+        "delta_psnr": 1.478,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 33.008,
+        "delta_psnr": 1.493,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.014,
+        "delta_psnr": 0.446,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.485,
+        "delta_psnr": 0.918,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662
+      },
+      "steps": 400,
+      "veto": null
+    },
+    {
+      "combat_first32_full": {
+        "identity_psnr": 31.032,
+        "student_psnr": 31.063,
+        "delta_psnr": 0.031,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.18
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 32.062,
+        "student_psnr": 31.891,
+        "delta_psnr": -0.172,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.295
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.906,
+        "delta_psnr": 1.391,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.923,
+        "delta_psnr": 1.408,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.083,
+        "delta_psnr": 0.515,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.575,
+        "delta_psnr": 1.007,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662
+      },
+      "steps": 600,
+      "veto": null
+    },
+    {
+      "combat_first32_full": {
+        "identity_psnr": 31.032,
+        "student_psnr": 31.064,
+        "delta_psnr": 0.032,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.18
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 32.062,
+        "student_psnr": 31.927,
+        "delta_psnr": -0.136,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.295
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.666,
+        "delta_psnr": 1.151,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.715,
+        "delta_psnr": 1.2,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 25.934,
+        "delta_psnr": 0.366,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.392,
+        "delta_psnr": 0.825,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662
+      },
+      "steps": 800,
+      "veto": null
+    }
+  ],
+  "status": "done",
+  "do_not": [
+    "ampere400",
+    "grow_width",
+    "shrink_below_960x540"
+  ],
+  "combat_skip_dirty_best": {
+    "delta_psnr": 0.112,
+    "identity_psnr": 31.032,
+    "student_psnr": 31.144,
+    "paths": {
+      "fullframe": 14,
+      "fullframe_dirty": 14,
+      "storm": 4
+    },
+    "gate": "fail"
+  },
+  "peak": {
+    "steps": 400,
+    "combat_first32_full": 0.039,
+    "combat_last32_leaky": -0.157,
+    "room2_full": 1.478,
+    "room2_skip": 1.493,
+    "holdout_last32_full": 0.446
+  },
+  "lesson": "HUD-masked combat+holdout105 mix recovered combat first32 from -0.246 to +0.039 and skip to +0.112 \u2014 still fails +0.25. Burst hold-outs held (room2 skip +1.49, holdout last32 +0.446). Same-burst last32 stayed negative (leak, not a gate). Leftover 000237+ was not used. One 8s HUD-on warehouse clip is not enough distribution; next combat quality lever is another burst (or HUD-off if DXHR ever allows), not more steps on this clip."
+}

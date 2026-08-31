@@ -1,0 +1,36 @@
+{
+  "kind": "timing_only",
+  "quality_claims": false,
+  "question": "Is INT8 even faster than FP16 at ~193k params / 960x540?",
+  "answer": "No. QDQ INT8 is slower than FP16 on both the GN smoke graph and the no-GN smoke_int8 graph.",
+  "paired_same_session": {
+    "data": "datasets/q540-dxhr-room2",
+    "every_n": 2,
+    "dirty_tiles": true,
+    "storm": true,
+    "gn_smoke_193043": {
+      "fp16_engine": "engines/student_960x540_1ae115ab73.engine",
+      "int8_engine": "engines/student_960x540_1ae115ab73_int8.engine",
+      "fp16_mean_ms": 6.048,
+      "int8_mean_ms": 6.545,
+      "fp16_student_mean_ms": 7.601,
+      "int8_student_mean_ms": 8.279
+    },
+    "nogn_smoke_int8_192595": {
+      "fp16_engine": "engines/student_960x540_1e8abae07c.engine",
+      "int8_engine": "engines/student_960x540_1e8abae07c_int8.engine",
+      "fp16_mean_ms": 5.105,
+      "int8_mean_ms": 6.361,
+      "fp16_student_mean_ms": 6.31,
+      "int8_student_mean_ms": 7.954,
+      "note": "Timing only. This graph missed +0.25. Do not cite these ms as a quality result."
+    }
+  },
+  "earlier_clean_session_gn": {
+    "fp16_mean_ms": 5.034,
+    "int8_mean_ms": 6.595
+  },
+  "lesson": "At this size the QDQ / INT8 path does not beat FP16. The BN-fold (or any INT8) effort is not the next latency lever. Drop qdq_on_failed_nogn from do_not for timing; keep it for quality claims. Storm + more combat data are the live levers.",
+  "do_not": ["ampere400", "grow_width", "shrink_below_960x540"],
+  "do_not_quality_claim": ["qdq_on_failed_nogn"]
+}

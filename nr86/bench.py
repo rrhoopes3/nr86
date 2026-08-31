@@ -62,6 +62,7 @@ def bench_ckpt(
     use_trt: bool = False,
     engine: Path | None = None,
     int8: bool = False,
+    storm: bool = True,
 ) -> dict:
     if data is not None:
         report = bench_sequence(
@@ -75,6 +76,7 @@ def bench_ckpt(
             use_trt=use_trt,
             engine=engine,
             int8=int8,
+            storm=storm,
         )
     else:
         report = _bench_eager(ckpt, size, warmup, iters, scaling_ratio, every_n)
@@ -200,6 +202,7 @@ def bench_sequence(
     use_trt: bool = False,
     engine: Path | None = None,
     int8: bool = False,
+    storm: bool = True,
 ) -> dict:
     """Time skip/dirty with prev on device. D2H is off. Color/mvec H2D stays on."""
     from nr86.dataset import FrameDataset, load_frame, pack_input
@@ -239,6 +242,7 @@ def bench_sequence(
         tile=spec.tile,
         overlap=spec.overlap,
         dirty_tiles=dirty_tiles,
+        storm=storm,
     )
 
     def run_pass(record: bool) -> tuple[int, int, list[float], dict[str, list[float]], list[float]]:
@@ -288,7 +292,7 @@ def bench_sequence(
     path_ms = {k: _path_summary(v) for k, v in sorted(combined.items())}
     overall = _path_summary(all_frames)
     student_times: list[float] = []
-    for key in ("fullframe", "fullframe_dirty"):
+    for key in ("fullframe", "fullframe_dirty", "storm"):
         student_times.extend(combined.get(key) or [])
     student = _path_summary(student_times)
     mean_ms = overall["mean_ms"] if overall else None
@@ -329,6 +333,7 @@ def bench_sequence(
         "frames": n,
         "every_n": every_n,
         "dirty_tiles": dirty_tiles,
+        "storm": storm and dirty_tiles,
         "tile": spec.tile,
         "tiles_executed": last_exec,
         "tiles_total": last_total,
@@ -355,6 +360,6 @@ def bench_sequence(
             f"{backend} FrameRunner: prev_color/prev_out stay on GPU. "
             "Color/mvec H2D via pinned host buffers each frame (honest numpy harness). "
             "No D2H of RGB. Mean is all frames; student-path p95 is fullframe + "
-            "fullframe_dirty (the stutter spike). 10.7 ms eager-858x482 is retired."
+            "fullframe_dirty + storm (the stutter spike). 10.7 ms eager-858x482 is retired."
         ),
     }

@@ -10,6 +10,32 @@ from nr86.models.student import build_student, count_params
 from nr86.synth import write_synth
 
 
+def test_hud_mask_zeros_dxhr_corners():
+    from nr86.hud_mask import keep_mask, tile_keep
+
+    m = keep_mask(540, 960)
+    assert float(m.mean()) > 0.7
+    assert float(m[0, 0]) == 0.0
+    assert float(m[-1, 0]) == 0.0
+    assert float(m[270, 480]) == 1.0
+    t = tile_keep(540, 960, 0, 0, 128, 128)
+    assert float(t[0, 0]) == 0.0
+
+
+def test_tile_dataset_returns_keep(tmp_path: Path):
+    from nr86.train import TileTorchDataset
+
+    n = write_synth(tmp_path / "ds", frames=2, size=128, hq_scale=2)
+    assert n == 2
+    ds = TileTorchDataset(tmp_path / "ds", tile=32, epoch_tiles=3, hud="dxhr")
+    x, y, keep = ds[0]
+    assert x.shape[0] == 6
+    assert y.shape[0] == 3
+    assert keep.shape == (32, 32)
+    assert float(keep.min()) >= 0.0
+    assert float(keep.max()) <= 1.0
+
+
 def test_legal_blocks_leak_names(tmp_path: Path):
     p = tmp_path / "nvngx_dlssnr.dll"
     p.write_bytes(b"nope")

@@ -40,6 +40,9 @@ def main(argv: list[str] | None = None) -> int:
     p_t.add_argument("--resume", type=Path, default=None)
     p_t.add_argument("--skip-eval", action="store_true")
     p_t.add_argument("--data-frames", type=int, default=None, help="Train on the first N frames only")
+    p_t.add_argument("--extra", type=Path, default=None, help="Second taught dump mixed into the tile pool")
+    p_t.add_argument("--extra-frames", type=int, default=None)
+    p_t.add_argument("--hud-mask", choices=["none", "dxhr"], default="none")
 
     p_ev = sub.add_parser("eval", help="PSNR/SSIM vs teacher and vs identity")
     p_ev.add_argument("--ckpt", type=Path, required=True)
@@ -57,6 +60,11 @@ def main(argv: list[str] | None = None) -> int:
     p_ev.add_argument("--engine", type=Path, default=None)
     p_ev.add_argument("--offset", type=int, default=0, help="Skip this many frames (hold-out start)")
     p_ev.add_argument("--int8", action="store_true", help="Build/use a QDQ INT8 TensorRT engine")
+    p_ev.add_argument(
+        "--no-storm",
+        action="store_true",
+        help="Disable storm mode (bare full-frame after sustained dirty fill)",
+    )
 
     p_e = sub.add_parser("export", help="Export student ONNX")
     p_e.add_argument("--ckpt", type=Path, required=True)
@@ -85,6 +93,11 @@ def main(argv: list[str] | None = None) -> int:
     p_b.add_argument("--use-trt", action="store_true", help="Run the student as a TensorRT-RTX engine")
     p_b.add_argument("--engine", type=Path, default=None)
     p_b.add_argument("--int8", action="store_true", help="Build/use a QDQ INT8 TensorRT engine")
+    p_b.add_argument(
+        "--no-storm",
+        action="store_true",
+        help="Disable storm mode (bare full-frame after sustained dirty fill)",
+    )
 
     p_p = sub.add_parser("place", help="Pixel-ops cost (average and worst-case)")
     p_p.add_argument("--preset", choices=sorted(PRESETS), default="ampere")
@@ -165,6 +178,9 @@ def _dispatch(args: argparse.Namespace) -> int:
             resume=args.resume,
             skip_eval=args.skip_eval,
             data_frames=args.data_frames,
+            extra=args.extra,
+            extra_frames=args.extra_frames,
+            hud_mask=args.hud_mask,
         )
         return 0
     if args.cmd == "eval":
@@ -181,6 +197,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             engine=args.engine,
             offset=args.offset,
             int8=args.int8,
+            storm=not args.no_storm,
         )
         return 0
     if args.cmd == "export":
@@ -217,6 +234,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             use_trt=args.use_trt,
             engine=args.engine,
             int8=args.int8,
+            storm=not args.no_storm,
         )
         return 0
     if args.cmd == "place":

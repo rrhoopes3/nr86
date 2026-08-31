@@ -1,0 +1,37 @@
+{
+  "scene": "paired lobby vs combat TRT re-bench (Fable item 1)",
+  "ckpt": "runs/dxhr-depth-smoke-q540/student_best.pt",
+  "engine": "engines/student_960x540_1ae115ab73.engine",
+  "dxhr_open_during_bench": true,
+  "note": "Game was still open (same 3090). This is not a cold re-bench. Close dxhr.exe and re-run to get the 6.4-class student number.",
+  "paired_game_open": {
+    "lobby_skip_dirty_mean_ms": 7.425,
+    "lobby_student_path_mean_ms": 9.41,
+    "lobby_every_n_1_mean_ms": 11.462,
+    "combat_skip_dirty_mean_ms": 9.66,
+    "combat_student_path_mean_ms": 9.66,
+    "combat_every_n_1_mean_ms": 11.425
+  },
+  "earlier_published": {
+    "lobby_skip_dirty_mean_ms": 5.034,
+    "lobby_student_path_mean_ms": 6.38,
+    "combat_skip_dirty_mean_ms": 9.988,
+    "combat_student_path_p95_ms": 11.084
+  },
+  "storm_on_combat_game_open": {
+    "skip_dirty_mean_ms": 10.58,
+    "path_ms": {
+      "fullframe": 10.577,
+      "fullframe_dirty": 10.914,
+      "storm": 9.425
+    },
+    "lesson": "Storm fires and drops warp/mask/composite (~1.5 ms vs dirty on a hot GPU). Mean still misses 8.33 while the game is open. Storm cannot invent the cold 6.4."
+  },
+  "quality_with_storm": {
+    "combat_skip_delta_psnr": -0.172,
+    "lobby_skip_delta_psnr": 1.527,
+    "lobby_paths": {"fullframe": 14, "warp_clean": 9, "fullframe_dirty": 5, "storm": 4}
+  },
+  "lesson": "Fable was right that the 56% combat-vs-lobby student gap was environment, not the graph. Paired every-n=1 is 11.425 vs 11.462 ms (scene-independent). Student-path skip is 9.41 lobby vs 9.66 combat. Combat still fails the mean because executed_frac is 1.0 (no warp_clean) on a contended GPU. Cold, student ~6.4 would put even all-dirty combat under 8.33; storm is the right runtime policy either way. Quality is the real fail.",
+  "do_not": ["ampere400", "grow_width", "shrink_below_960x540"]
+}
