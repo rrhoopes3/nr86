@@ -1,29 +1,28 @@
 # nr86
 
-Neural rendering engine for Ampere (`sm_86`). Distill an INT8 student you
-own; tiles, masks, ScalingRatio on 3rd-gen tensor cores. Not a DLSS installer.
+Research scaffold for an Ampere (`sm_86`) neural-rendering student.
+Not a working DLSS workaround, not a shipping neural-rendering engine,
+and not an INT8 product yet.
 
-Built for a GeForce RTX 3090. The leaked DLSS 5 Neural Rendering path is an
-FP8 teacher JIT-compiled as FP16. That is why a 3090 can *show* Hogwarts at
-~30 FPS DLAA+NR and why Cyberpunk / DRG still fall off a cliff. This repo
-is the other job: an engine that actually uses 3rd-gen tensor cores
-(INT8 / INT4 / 2:4 sparsity), at Quality-input size, with tiling and a mask.
-
-Win 11 is not the problem. FP8-cast-to-FP16 is the problem.
+The hardware thesis is still the right one: a 3090 has no FP8 MMA. The
+leaked DLSS 5 Neural Rendering path is an FP8 teacher JIT-compiled as
+FP16. This repo is the other job — a student *you own*, at Quality-input
+size, with a mask and every-Nth reuse, aimed at 3rd-gen tensor cores.
+INT8 / INT4 / 2:4 sparsity are **roadmap**, not implementation.
 
 ## What you get today
 
 | Piece | Status |
 | --- | --- |
 | Hardware doctor (sm, VRAM, FP8/INT8/sparsity) | working |
-| Self-teacher (HQ capture → cheap + Lanczos teacher) | working — this is the quality target |
+| Capture → ingest (first-frame `prev_color: null` is valid) | working |
+| Self-teacher (Lanczos + depth punch / cheap + mvec smear) | working — still synthetic |
 | PSNR/SSIM eval vs teacher **and** identity | working (`nr86 eval`) |
-| Farneback mvec + warp / every-N composite | working |
-| Placement: average **and** worst-case | working |
-| Residual UNet (`gn` FP16 / `none` INT8) | working |
-| Capture addon: BGRA/RGBA/RGB10A2, depth formats, prev-color | rebuilt |
-| INT8 / TensorRT-RTX | scaffolding (SDK not on PATH yet) |
-| CoopVec / RTXNS | different product (neural shading), stub only |
+| Residual-after-warp mask; skip-frame + dirty-tile runtime | working — measured tiles + ms |
+| Placement: average **and** worst-case | **cost model**, not measured |
+| Residual UNet (`gn` FP16 / `none` reserved for later INT8) | working |
+| TensorRT-RTX FP16 bench | path exists; needs the SDK |
+| INT8 QDQ / INT4 / 2:4 / RTXNS | **not implemented** |
 
 Pulled in as git submodules / vendored headers (open or official only):
 
@@ -43,21 +42,24 @@ python -m nr86 doctor
 python -m nr86 synth --out datasets/synth --frames 24 --size 512
 python -m nr86 train --data datasets/synth --preset smoke --steps 40 --out runs/smoke
 python -m nr86 eval --ckpt runs/smoke/student.pt --data datasets/synth
-python -m nr86 bench --ckpt runs/smoke/student.pt --size 1280x720
+python -m nr86 eval --ckpt runs/smoke/student.pt --data datasets/synth --every-n 2 --dirty-tiles --ablate none
+python -m nr86 bench --ckpt runs/smoke/student.pt --size 1280x720 --try-trt
+python -m nr86 bench --ckpt runs/smoke/student.pt --data datasets/synth --every-n 2 --dirty-tiles
 python -m nr86 place --preset ampere --size 1920x1080
 ```
 
-`eval` must beat identity. `place` prints worst-case (~2.2× on a camera
-swing) next to the 13× average. Budget the worst-case row.
+`eval` must beat identity. `place` is a pixel-ops model (~13× average vs
+~2.2× worst-case). That ratio is **not** a measured millisecond saving.
+`bench --data` reports `tiles_executed` and CUDA-event `mean_ms`.
 
 ## Why the 30-series tweak is not the product
 
 | Existing 30xx addon | This project |
 | --- | --- |
 | Makes Blackwell cubins *run* on sm_86 | Makes a student *fast* on sm_86 |
-| Approx-FP16 of an FP8 148M teacher | INT8 W8A8 (then INT4 + 2:4) on 3rd-gen tensor cores |
-| Full-frame, every frame, post-upscale | Internal res via ScalingRatio, mask, every 2nd frame, tiles |
-| Driver JIT of patched PTX | Your ONNX → TensorRT-RTX, or RTXNS in-shader |
+| Approx-FP16 of an FP8 148M teacher | Intended INT8 later; today FP16 PyTorch |
+| Full-frame, every frame, post-upscale | Internal res, mask, every 2nd frame, tiles |
+| Driver JIT of patched PTX | Your ONNX → TensorRT-RTX (when the SDK is there) |
 
 24 GB VRAM is the one thing that does not suck: a 148M teacher plus
 activations fits. Distilling a 20–40M student on one 3090 is a week, not a
@@ -66,20 +68,22 @@ cluster. The smoke preset is minutes.
 ## Repo layout
 
 ```
-nr86/                 Python engine (dataset, student, distill, bench, TRT)
+nr86/                 Python engine (dataset, student, distill, runtime, bench)
 addons/nr86_capture/  ReShade addon: dump color/depth for offline training
-shaders/              CoopVec MLP stub (RTXNS track)
+shaders/              CoopVec MLP stub (RTXNS track — postponed)
 third_party/          TensorRT-RTX, RTXNS, ReShade headers
 docs/                 architecture + measurement protocol
 ```
 
-## Next (days, not another DLL drop)
+## Next (defensible result, not another DLL drop)
 
-1. TensorRT-RTX SDK on PATH — every current ms number is a proxy.
-2. One offline title, HUD off, highest res the game will do, F9 burst.
-   `nr86 inspect` the dump, then `ingest` + `selfteach --size 1280x720`.
-3. `eval` must beat identity before any INT8 work. Then `ampere_int8`
-   (no GroupNorm). If INT8 does not beat the leak numbers, cut pixels.
+1. TensorRT-RTX SDK on PATH — a real FP16 720p engine number.
+2. One offline title, HUD off, F9 burst. `inspect` → `ingest` → `selfteach`.
+3. `eval` must beat identity on that capture. Ablate RGB / depth / mvec.
+4. Only then QDQ INT8 on `ampere_int8`. Postpone INT4, 2:4, and RTXNS.
+
+The milestone that turns this from a scaffold into systems research:
+**this student beats identity on real captures and runs in X ms on a 3090.**
 
 Do not grow toward 20–40M until the quality gate passes. Do not put this
 on multiplayer.

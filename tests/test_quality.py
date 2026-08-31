@@ -4,7 +4,7 @@ import numpy as np
 
 from nr86.inspect_capture import inspect_capture
 from nr86.metrics import psnr, ssim
-from nr86.reproject import fill_ratio, motion_luma_mask, warp_rgb
+from nr86.reproject import fill_ratio, residual_mask, warp_rgb
 from nr86.selfteach import pair_frame
 from nr86.synth import generate_frame
 
@@ -36,11 +36,12 @@ def test_selfteach_pair_changes_res_and_makes_a_task():
     assert float(np.mean(np.abs(pair.color - pair.teacher))) > 1e-4
 
 
-def test_motion_mask_fill_is_one_on_big_flow():
-    color = np.zeros((16, 16, 3), dtype=np.float32)
+def test_motion_mask_is_residual_after_warp_not_raw_flow():
+    color = np.full((16, 16, 3), 0.3, dtype=np.float32)
     mvec = np.ones((16, 16, 2), dtype=np.float32) * 0.05
-    mask = motion_luma_mask(color, color, mvec, motion_norm=0.004)
-    assert fill_ratio(mask) == 1.0
+    warped = warp_rgb(color, mvec)
+    mask = residual_mask(color, warped)
+    assert fill_ratio(mask) < 0.05
 
 
 def test_inspect_flags_bad_depth_size(tmp_path: Path):

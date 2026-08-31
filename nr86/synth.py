@@ -59,5 +59,13 @@ def write_synth(out: Path, frames: int, size: int, seed: int = 0, hq_scale: int 
             from nr86.models.teacher import placeholder_teacher
 
             paired.teacher = placeholder_teacher(paired.color, paired.depth)
-        writer.add(paired, extra={"teacher_kind": "selfteach", "hq_scale": hq_scale})
+        writer.add(
+            paired,
+            extra={
+                "teacher_kind": "selfteach",
+                "hq_scale": hq_scale,
+                "teacher_cues": "lanczos+depth_punch",
+                "cheap_cues": "box+bilinear+mvec_smear",
+            },
+        )
     return writer.n_frames

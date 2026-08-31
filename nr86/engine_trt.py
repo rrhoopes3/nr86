@@ -13,6 +13,39 @@ from pathlib import Path
 from nr86.legal import assert_path_allowed
 
 
+def tensorrt_fp16_status() -> dict:
+    """Honest availability. Does not invent a millisecond number."""
+    cli = shutil.which("tensorrt_rtx") or shutil.which("tensorrt_rtx.exe")
+    py = False
+    py_ver = None
+    try:
+        import tensorrt_rtx as trt
+
+        py = True
+        py_ver = getattr(trt, "__version__", "present")
+    except ImportError:
+        pass
+    available = bool(cli or py)
+    return {
+        "available": available,
+        "cli": cli,
+        "python_module": py,
+        "python_version": py_ver,
+        "precision": "fp16",
+        "mean_ms": None,
+        "note": (
+            "SDK present. This status check does not time an engine. "
+            "Build with `nr86 export` + `nr86 trt` for a real FP16 number."
+            if available
+            else (
+                "TensorRT-RTX SDK is not installed. No FP16 engine number. "
+                "Install the SDK and put tensorrt_rtx.exe on PATH, then "
+                "`nr86 export` + `nr86 trt`. Do not treat ONNX Runtime as TRT."
+            )
+        ),
+    }
+
+
 def build_engine(onnx_path: Path, engine_path: Path, extra: list[str] | None = None) -> Path:
     onnx_path = assert_path_allowed(onnx_path)
     engine_path = Path(engine_path)

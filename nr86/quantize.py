@@ -1,13 +1,11 @@
-"""INT8 calibration hooks.
+"""INT8 calibration hooks (not a working INT8 path).
 
-TensorRT-RTX wants strongly-typed ONNX. We collect per-tensor min/max on the
-student's activations (histogram PTQ) and write a JSON the TRT builder can
-consume. Full QDQ graph rewrite lands when `tensorrt_rtx` is installed.
+Collects per-tensor min/max on student activations and writes JSON.
+This is not histogram calibration. The TensorRT builder does not read
+this file and does not insert a QDQ graph. INT4 and 2:4 sparsity are
+not implemented.
 
 This is not FP8->INT8 of NVIDIA's 148M teacher. It calibrates *our* student.
-
-If INT8 looks worse than FP16 by more than the usual 0.2 dB, suspect
-GroupNorm before the calibrator. Use preset `ampere_int8` (norm=none).
 """
 
 from __future__ import annotations
@@ -77,7 +75,10 @@ def calibrate(
         "tiles_seen": n,
         "preset": model.spec.name,
         "ranges": ranges,
-        "note": "PTQ min/max for our student, not NVIDIA NR tensors.",
+        "note": (
+            "Min/max ranges only. Not histogram PTQ. Not consumed by the "
+            "TensorRT builder. No QDQ graph."
+        ),
     }
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)

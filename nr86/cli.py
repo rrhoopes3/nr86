@@ -43,6 +43,13 @@ def main(argv: list[str] | None = None) -> int:
     p_ev.add_argument("--data", type=Path, required=True)
     p_ev.add_argument("--max-frames", type=int, default=32)
     p_ev.add_argument("--every-n", type=int, default=1)
+    p_ev.add_argument("--dirty-tiles", action="store_true")
+    p_ev.add_argument(
+        "--ablate",
+        choices=["none", "rgb", "depth", "mvec"],
+        default="none",
+        help="Zero input channels: rgb keeps color only; depth/mvec drop that cue",
+    )
 
     p_e = sub.add_parser("export", help="Export student ONNX")
     p_e.add_argument("--ckpt", type=Path, required=True)
@@ -62,6 +69,10 @@ def main(argv: list[str] | None = None) -> int:
     p_b.add_argument("--every-n", type=int, default=1)
     p_b.add_argument("--iters", type=int, default=50)
     p_b.add_argument("--warmup", type=int, default=10)
+    p_b.add_argument("--data", type=Path, default=None, help="Sequence: measure skip / dirty tiles")
+    p_b.add_argument("--dirty-tiles", action="store_true")
+    p_b.add_argument("--max-frames", type=int, default=32)
+    p_b.add_argument("--try-trt", action="store_true", help="Report TensorRT-RTX FP16 availability")
 
     p_p = sub.add_parser("place", help="Pixel-ops cost (average and worst-case)")
     p_p.add_argument("--preset", choices=sorted(PRESETS), default="ampere")
@@ -126,7 +137,14 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "eval":
         from nr86.eval import evaluate
 
-        evaluate(args.ckpt, args.data, args.max_frames, args.every_n)
+        evaluate(
+            args.ckpt,
+            args.data,
+            args.max_frames,
+            args.every_n,
+            dirty_tiles=args.dirty_tiles,
+            ablate=args.ablate,
+        )
         return 0
     if args.cmd == "export":
         from nr86.export_onnx import export_onnx
@@ -148,6 +166,10 @@ def _dispatch(args: argparse.Namespace) -> int:
             iters=args.iters,
             scaling_ratio=args.scaling,
             every_n=args.every_n,
+            data=args.data,
+            dirty_tiles=args.dirty_tiles,
+            max_frames=args.max_frames,
+            try_trt=args.try_trt,
         )
         return 0
     if args.cmd == "place":

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nr86"
 version = "0.1.0"
-description = "Ampere sm_86 neural-rendering engine: INT8 student, tiled placement, RTXNS track"
+description = "Research scaffold for an Ampere sm_86 neural-rendering student"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

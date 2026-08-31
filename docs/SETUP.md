@@ -50,10 +50,13 @@ python -m nr86 inspect --src "D:\Games\SomeGame\nr86_capture"
 python -m nr86 ingest --src "D:\Games\SomeGame\nr86_capture" --out datasets/raw
 python -m nr86 selfteach --data datasets/raw --out datasets/q720 --size 1280x720
 python -m nr86 eval --ckpt runs/smoke/student.pt --data datasets/q720
+python -m nr86 eval --ckpt runs/smoke/student.pt --data datasets/q720 --ablate depth
+python -m nr86 bench --ckpt runs/smoke/student.pt --data datasets/q720 --every-n 2 --dirty-tiles
 ```
 
 `cv` extra (`opencv`) is required for mvec. Without it, every-N placement
-is a lie.
+is a cost-model lie. Frame 0 of a capture dump has `"prev_color": null`;
+that is valid and must ingest.
 
 ## Driver notes (Ampere, not Win 11)
 

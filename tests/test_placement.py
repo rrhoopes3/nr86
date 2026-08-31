@@ -63,3 +63,5 @@ def test_placement_quality_is_much_cheaper_than_leak_fullframe():
     assert worst["mask_fill"] == 1.0
     assert 2.0 <= worst["cheapness_vs_leak_fullframe"] <= 2.5
     assert worst["cheapness_vs_leak_fullframe"] < s["cheapness_vs_leak_fullframe"]
+    assert s["kind"] == "cost_model"
+    assert s["measured"] is False

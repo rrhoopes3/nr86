@@ -2,7 +2,9 @@
 
 Games do not expose mvec through ReShade. Until a Streamline hook exists
 (LEGAL.md marks that future), consecutive color frames → Farneback flow.
-Every-2nd-frame placement is a no-op without warp; this is that warp.
+
+Dirty pixels are residuals *after* warp. Raw motion magnitude dirties the
+whole screen on a camera pan even when reprojection worked.
 """
 
 from __future__ import annotations
@@ -67,21 +69,29 @@ def _warp_numpy(image: np.ndarray, mvec: np.ndarray) -> np.ndarray:
     )
 
 
+def residual_mask(
+    color: np.ndarray,
+    warped_prev: np.ndarray | None,
+    luma_eps: float = 0.02,
+) -> np.ndarray:
+    """True where warp failed (run the student). Compare to *warped* previous."""
+    if warped_prev is None:
+        return np.ones(color.shape[:2], dtype=bool)
+    luma = color @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
+    prev = warped_prev @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
+    return np.abs(luma - prev) >= luma_eps
+
+
+# Back-compat name used by older tests / call sites.
 def motion_luma_mask(
     color: np.ndarray,
-    prev_color: np.ndarray | None,
-    mvec: np.ndarray,
+    warped_prev: np.ndarray | None,
+    mvec: np.ndarray | None = None,
     motion_norm: float = 0.004,
     luma_eps: float = 0.02,
 ) -> np.ndarray:
-    """True where the student should run. False → reuse warped previous."""
-    mag = np.sqrt(mvec[..., 0] ** 2 + mvec[..., 1] ** 2)
-    mask = mag >= motion_norm
-    if prev_color is not None:
-        luma = color @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
-        prev = prev_color @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
-        mask = mask | (np.abs(luma - prev) >= luma_eps)
-    return mask
+    del mvec, motion_norm
+    return residual_mask(color, warped_prev, luma_eps=luma_eps)
 
 
 def composite(

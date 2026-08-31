@@ -50,6 +50,25 @@ def pack_input(frame: Frame) -> np.ndarray:
     return packed.astype(np.float32)
 
 
+ABLATIONS = ("none", "rgb", "depth", "mvec")
+
+
+def apply_ablation(packed: np.ndarray, mode: str) -> np.ndarray:
+    """Zero input channels. `rgb` keeps color and drops depth+mvec."""
+    if mode == "none":
+        return packed
+    if mode not in ABLATIONS:
+        raise ValueError(f"unknown ablation {mode!r}, expected {ABLATIONS}")
+    x = packed.copy()
+    if mode == "rgb":
+        x[3:] = 0.0
+    elif mode == "depth":
+        x[3] = 0.0
+    elif mode == "mvec":
+        x[4:6] = 0.0
+    return x
+
+
 class DatasetWriter:
     def __init__(self, root: Path) -> None:
         self.root = Path(root)

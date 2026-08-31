@@ -47,9 +47,12 @@ def inspect_capture(src: Path) -> dict:
                 else:
                     depth_ok += 1
             depth_formats.add(str(meta.get("depth_format") or "unspecified"))
-        prev = folder / meta.get("prev_color", "color_prev.bmp")
-        if prev.exists():
-            prev_ok += 1
+        prev_name = meta.get("prev_color")
+        # Addon writes JSON null on frame 0. Path / None raises TypeError.
+        if isinstance(prev_name, str) and prev_name not in ("", "null"):
+            prev = folder / prev_name
+            if prev.exists():
+                prev_ok += 1
         note = meta.get("note") or ""
         if "post-ui" in note.lower() or "post_ui" in note.lower():
             pass

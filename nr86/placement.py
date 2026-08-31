@@ -71,9 +71,12 @@ def summarize(p: Placement) -> dict:
         "output": (p.output_w, p.output_h),
         **avg,
         "worst_case": _row(worst),
+        "kind": "cost_model",
+        "measured": False,
         "note": (
-            "Average assumes honest mask + every-N. Worst-case is scaling "
-            "alone (~2.2x at 0.67). Budget worst-case milliseconds."
+            "Cost model, not measured milliseconds. Average assumes an honest "
+            "mask + every-N. Worst-case is scaling alone (~2.2x at 0.67). "
+            "Budget that row. Use `nr86 bench --data` for executed tiles + ms."
         ),
     }
 

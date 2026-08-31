@@ -10,8 +10,10 @@ display-referred LDR). Real DLSS runs on linear HDR pre-UI. Fine for the
 self-teacher; not a shipping path.
 
 F10 = one frame. **F9 burst** writes `color_prev.bmp` so ingest can
-Farneback motion vectors. Without a burst, mvec is zero and the 13×
-placement number degrades to scaling-only (~2.2×).
+Farneback motion vectors. Frame 0 writes `"prev_color": null` (valid).
+Without a burst, mvec is zero and the placement **cost model** degrades
+to scaling-only (~2.2×). That 13× figure is not a measured millisecond
+saving.
 
 Supported color: BGRA8, RGBA8, BGRX, RGB10A2, RGBA16F, RGBA32F.
 Supported depth: D32F, D24S8, D16, D32FS8 (converted to float32).

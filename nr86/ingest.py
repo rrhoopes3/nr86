@@ -72,9 +72,12 @@ def ingest(
             depth = _load_depth(depth_p, h, w, meta)
         else:
             depth = np.zeros((h, w), dtype=np.float32)
-        prev_p = folder / meta.get("prev_color", "color_prev.bmp")
-        if prev_p.exists():
-            prev_color = _load_color(prev_p)
+        prev_name = meta.get("prev_color")
+        # Addon writes JSON null on frame 0. Path / None raises TypeError.
+        if isinstance(prev_name, str) and prev_name not in ("", "null"):
+            prev_p = folder / prev_name
+            if prev_p.exists():
+                prev_color = _load_color(prev_p)
         mvec = np.zeros((h, w, 2), dtype=np.float32)
         source = "zero"
         mvec_p = folder / meta.get("mvec", "mvec.f32")
@@ -112,8 +115,8 @@ def ingest(
     if n_flow == 0:
         print(
             "WARNING: every frame has zero motion vectors. Burst-capture (F9) "
-            "or drop color_prev.bmp so Farneback can run. The 13x placement "
-            "number degrades to scaling-only (~2.2x) without mvec."
+            "or drop color_prev.bmp so Farneback can run. The placement cost "
+            "model then degrades to scaling-only (~2.2x) without mvec."
         )
     if not placeholder:
         print(

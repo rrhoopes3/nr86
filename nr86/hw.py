@@ -103,6 +103,7 @@ def doctor() -> dict[str, Any]:
         else (
             "This GPU has no FP8 MMA. The leaked NR teacher is an FP8 network; "
             "casting it to FP16 is a compatibility port, not an Ampere engine. "
-            "nr86 targets INT8 / sparsity instead."
+            "nr86 is a research scaffold aimed at INT8 / sparsity later; "
+            "those paths are not implemented yet."
         ),
     }
