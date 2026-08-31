@@ -21,6 +21,7 @@ class TileTorchDataset(Dataset):
         max_frames: int | None = None,
         extra: Path | None = None,
         extra_frames: int | None = None,
+        mix: list[Path] | None = None,
         hud: str = "none",
     ) -> None:
         from nr86.hud_mask import PRESETS as HUD_PRESETS
@@ -32,6 +33,8 @@ class TileTorchDataset(Dataset):
             self.pools.append(
                 FrameDataset(extra, require_teacher=True, offset=0, max_frames=extra_frames)
             )
+        for mix_p in mix or []:
+            self.pools.append(FrameDataset(mix_p, require_teacher=True))
         weights = np.array([len(p) for p in self.pools], dtype=np.float64)
         self.pool_p = weights / weights.sum()
         self.tile = tile
@@ -83,6 +86,7 @@ def train(
     data_frames: int | None = None,
     extra: Path | None = None,
     extra_frames: int | None = None,
+    mix: list[Path] | None = None,
     hud_mask: str = "none",
 ) -> dict:
     from nr86.config import PRESETS
@@ -102,6 +106,7 @@ def train(
         max_frames=data_frames,
         extra=extra,
         extra_frames=extra_frames,
+        mix=mix,
         hud=hud_mask,
     )
     loader = DataLoader(ds, batch_size=batch, shuffle=False, num_workers=0)

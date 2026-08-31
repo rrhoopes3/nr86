@@ -42,6 +42,7 @@ def main(argv: list[str] | None = None) -> int:
     p_t.add_argument("--data-frames", type=int, default=None, help="Train on the first N frames only")
     p_t.add_argument("--extra", type=Path, default=None, help="Second taught dump mixed into the tile pool")
     p_t.add_argument("--extra-frames", type=int, default=None)
+    p_t.add_argument("--mix", type=Path, action="append", default=None, help="Additional taught dumps mixed in full")
     p_t.add_argument("--hud-mask", choices=["none", "dxhr"], default="none")
 
     p_ev = sub.add_parser("eval", help="PSNR/SSIM vs teacher and vs identity")
@@ -180,6 +181,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             data_frames=args.data_frames,
             extra=args.extra,
             extra_frames=args.extra_frames,
+            mix=args.mix,
             hud_mask=args.hud_mask,
         )
         return 0

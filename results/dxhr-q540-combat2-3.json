@@ -1,0 +1,60 @@
+{
+  "scene": "two new warehouse F9 bursts, staged by meta.json mtime",
+  "leftover_not_ingested": "000293+ (morning leftover IDs, not these bursts)",
+  "bursts": {
+    "combat2": {
+      "when": "13:53:22-13:53:27",
+      "log": "burst ON, backup=1 min=0.0901 max=0.9764",
+      "ids": "000000-000135",
+      "frames": 136,
+      "src": "datasets/_dxhr_combat2",
+      "raw": "datasets/raw-dxhr-combat2",
+      "taught": "datasets/q540-dxhr-combat2",
+      "depth_min": 0.0895,
+      "depth_mean_min": 0.5596,
+      "far_plane_frames": 0,
+      "content": "warehouse, PEPS, HOSTILE, XP popup; mid/late frames are CASIE/Smart Vision (red-cyan overlay — native DXHR, not student artifacts)",
+      "hud": "on"
+    },
+    "combat3": {
+      "when": "13:53:43-13:53:54",
+      "log": "burst ON, backup=1 min=0.0913 max=0.9774",
+      "ids": "000136-000292",
+      "frames": 157,
+      "src": "datasets/_dxhr_combat3",
+      "raw": "datasets/raw-dxhr-combat3",
+      "taught": "datasets/q540-dxhr-combat3",
+      "depth_min": 0.0888,
+      "depth_mean_min": 0.0911,
+      "far_plane_frames": 0,
+      "content": "same warehouse, Pritchard VO, HOSTILE, takedown prompts, stun takedown",
+      "hud": "on"
+    }
+  },
+  "zero_shot_hud_retrain_best": {
+    "ckpt": "runs/dxhr-combat-hud/student_best.pt",
+    "combat2_first32": {"delta_psnr": -0.85, "gate": "fail"},
+    "combat2_last32_smart_vision": {"delta_psnr": -2.691, "gate": "fail", "note": "CASIE overlay"},
+    "combat2_first32_skip_storm": {"delta_psnr": 1.146, "paths": {"fullframe": 4, "fullframe_dirty": 4, "storm": 24}, "gate": "pass", "note": "bare storm beats composite; residual warp is the quality tax"},
+    "combat3_first32": {"delta_psnr": -0.682, "gate": "fail"},
+    "combat3_last32_takedown": {"delta_psnr": 0.256, "gate": "pass"},
+    "combat3_first32_skip": {"delta_psnr": -0.453, "paths": {"fullframe": 13, "fullframe_dirty": 13, "storm": 6}, "gate": "fail"}
+  },
+  "zero_shot_q540_orig": {
+    "ckpt": "runs/dxhr-depth-smoke-q540/student_best.pt",
+    "combat2_first32": {"delta_psnr": -1.117, "gate": "fail"},
+    "combat3_first32": {"delta_psnr": -1.132, "gate": "fail"}
+  },
+  "retrain": {
+    "out": "runs/dxhr-combat-hud2/student_best.pt",
+    "result": "results/dxhr-q540-combat2-retrain.json",
+    "peak_steps": 600,
+    "unseen_combat3_first32": -0.638,
+    "unseen_combat3_skip": -0.407,
+    "unseen_combat3_last32": 0.309,
+    "room2_skip": 1.403,
+    "stop": "plateau"
+  },
+  "lesson": "Same warehouse, two more bursts: unseen takedown-approach still fails (+0.04 dB move). Storm already passes combat2 skip. Smart Vision last32 is a native overlay, not a student bug. Next F9 should be a different space.",
+  "do_not": ["ampere400", "grow_width", "shrink_below_960x540"]
+}

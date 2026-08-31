@@ -56,6 +56,19 @@ def _parse() -> argparse.Namespace:
     p.add_argument("--chunk", type=int, default=CHUNK)
     p.add_argument("--max-steps", type=int, default=MAX_STEPS)
     p.add_argument("--preset", default="smoke")
+    p.add_argument(
+        "--mix",
+        type=Path,
+        action="append",
+        default=None,
+        help="Extra taught combat dumps mixed in full (other bursts)",
+    )
+    p.add_argument(
+        "--eval-combat",
+        type=Path,
+        default=None,
+        help="Unseen combat burst used as the primary combat gate (not last-32 of train)",
+    )
     return p.parse_args()
 
 
@@ -84,7 +97,7 @@ def _eval_suite(ckpt: Path, args: argparse.Namespace) -> dict:
         every_n=2,
         dirty_tiles=True,
     )
-    return {
+    out = {
         "combat_first32_full": _brief(combat_first),
         "combat_last32_full_leaky": _brief(combat_last),
         "room2_full": _brief(room2_full),
@@ -92,6 +105,23 @@ def _eval_suite(ckpt: Path, args: argparse.Namespace) -> dict:
         "holdout_last32_full": _brief(hold_full),
         "holdout_last32_skip_dirty": _brief(hold_skip),
     }
+    if args.eval_combat is not None:
+        n_unseen = len(FrameDataset(args.eval_combat, require_teacher=True))
+        unseen_first = evaluate(ckpt, args.eval_combat, max_frames=32, offset=0, every_n=1)
+        unseen_skip = evaluate(
+            ckpt, args.eval_combat, max_frames=32, offset=0, every_n=2, dirty_tiles=True
+        )
+        unseen_last = evaluate(
+            ckpt,
+            args.eval_combat,
+            max_frames=32,
+            offset=max(0, n_unseen - 32),
+            every_n=1,
+        )
+        out["unseen_combat_first32_full"] = _brief(unseen_first)
+        out["unseen_combat_first32_skip"] = _brief(unseen_skip)
+        out["unseen_combat_last32_full"] = _brief(unseen_last)
+    return out
 
 
 def _veto(row: dict) -> str | None:
@@ -148,6 +178,7 @@ def main() -> None:
         )
         print(
             f"steps=0  combat={base['combat_first32_full']['delta_psnr']:+.3f}  "
+            f"unseen={(base.get('unseen_combat_first32_full') or {}).get('delta_psnr', 'n/a')}  "
             f"room2_skip={base['room2_skip_dirty']['delta_psnr']:+.3f}  "
             f"holdout={base['holdout_last32_full']['delta_psnr']:+.3f}  "
             f"veto={base['veto']}",
@@ -167,6 +198,7 @@ def main() -> None:
             seed=seed,
             extra=args.holdout,
             extra_frames=HOLDOUT_TRAIN_FRAMES,
+            mix=args.mix,
             hud_mask="dxhr",
         )
         total += args.chunk
@@ -176,7 +208,9 @@ def main() -> None:
         row["steps"] = total
         row["veto"] = _veto(row)
         history.append(row)
-        combat_d = float(row["combat_first32_full"]["delta_psnr"])
+        combat_d = float(
+            (row.get("unseen_combat_first32_full") or row["combat_first32_full"])["delta_psnr"]
+        )
         result.write_text(
             json.dumps(
                 {
@@ -202,7 +236,8 @@ def main() -> None:
             encoding="utf-8",
         )
         print(
-            f"steps={total}  combat={combat_d:+.3f}  "
+            f"steps={total}  gate={combat_d:+.3f}  "
+            f"train_combat={row['combat_first32_full']['delta_psnr']:+.3f}  "
             f"room2_skip={row['room2_skip_dirty']['delta_psnr']:+.3f}  "
             f"holdout={row['holdout_last32_full']['delta_psnr']:+.3f}  "
             f"veto={row['veto']}",
@@ -223,7 +258,12 @@ def main() -> None:
                 break
 
         prev = (
-            float(history[-2]["combat_first32_full"]["delta_psnr"])
+            float(
+                (
+                    history[-2].get("unseen_combat_first32_full")
+                    or history[-2]["combat_first32_full"]
+                )["delta_psnr"]
+            )
             if len(history) >= 2
             else float("-inf")
         )

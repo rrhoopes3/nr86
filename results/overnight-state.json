@@ -3,10 +3,10 @@
   "started": "2026-08-31T18:37:00Z",
   "loop": "running",
   "loop_name": "nr86day",
-  "tick": 5,
-  "day_tick": 5,
+  "tick": 6,
+  "day_tick": 6,
   "max_ticks": 12,
-  "next": "another_combat_f9",
+  "next": "different_space_combat_f9",
   "done": [
     "gpu_resident_run_frame",
     "cut_pixels_960x540_zeroshot",
@@ -18,25 +18,21 @@
     "combat_latency_paired_rebench",
     "storm_mode",
     "combat_retrain_hud_burst_holdout",
-    "int8_timing_only"
+    "int8_timing_only",
+    "ingest_combat2_combat3",
+    "combat2_3_retrain"
   ],
-  "blocked_on": ["another_combat_f9"],
-  "now_eligible": ["ingest_new_combat_burst_if_f9"],
+  "blocked_on": ["different_space_combat_f9"],
+  "now_eligible": ["ingest_new_combat_burst_if_f9_other_room"],
   "do_not": ["ampere400", "grow_width", "shrink_below_960x540"],
   "do_not_quality_claim": ["qdq_on_failed_nogn"],
-  "notes": "Tick 5 done (Fable order). (1) Paired re-bench: every-n=1 lobby 11.46 vs combat 11.43 — 56% student gap was clocks. (2) Storm is in FrameRunner. (3) Combat HUD-mask retrain plateaued +0.039 first32 / +0.112 skip; room2 +1.49 and holdout last32 +0.446 held. Need another combat burst, not more steps on this 8s clip. Leftover 000237+ is not a hold-out. (4) INT8 timing-only: QDQ slower than FP16 on GN (6.55 vs 6.05) and no-GN (6.36 vs 5.11). No INT8 quality claims. If a new F9 exists, stage by meta.json mtime only. Else wait. Do not grow width.",
+  "notes": "Tick 6 done. Two new warehouse F9s ingested (mtime only; leftover 000293+ skipped). Mix combat1+2 plateaued: unseen combat3 first32 -0.638 (from -0.682). Takedown last32 already passes. Combat2 skip+storm was already +1.15; Smart Vision last32 is -2.69 native overlay. Same warehouse is exhausted. Next F9 should be a different space. Do not grow width.",
   "findings": {
-    "trt_resident_q540_fp16_lobby_mean_ms": 5.034,
-    "q540_lobby_skip_delta": 1.224,
-    "combat_first32_delta_before": -0.246,
-    "combat_first32_delta_after_hud_retrain": 0.039,
-    "combat_skip_delta_after_hud_retrain": 0.112,
-    "combat_retrain_peak_steps": 400,
-    "room2_skip_after_combat_retrain": 1.493,
-    "holdout_last32_after_combat_retrain": 0.446,
-    "int8_slower_than_fp16_at_193k_540p": true,
-    "nogn_fp16_mean_ms": 5.105,
-    "nogn_int8_mean_ms": 6.361,
-    "leftover_000237_is_not_a_holdout": true
+    "combat2_skip_storm_delta": 1.146,
+    "combat2_last32_smart_vision_delta": -2.691,
+    "combat3_first32_delta_before": -0.682,
+    "combat3_first32_delta_after_mix": -0.638,
+    "combat3_last32_takedown_delta": 0.309,
+    "room2_skip_after_mix": 1.403
   }
 }
