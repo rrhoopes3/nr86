@@ -88,6 +88,20 @@ def _build_with_python(onnx_path: Path, engine_path: Path) -> Path:
     return engine_path
 
 
+def ensure_engine(ckpt: Path, height: int, width: int) -> Path:
+    """Export ONNX and build a TRT-RTX engine for this HxW if missing."""
+    from nr86.export_onnx import export_onnx
+
+    out_dir = Path("engines")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    engine_path = out_dir / f"student_{width}x{height}.engine"
+    if engine_path.exists() and engine_path.stat().st_size > 0:
+        return engine_path
+    onnx_path = out_dir / f"student_{width}x{height}.onnx"
+    export_onnx(ckpt, onnx_path, height, width)
+    return build_engine(onnx_path, engine_path)
+
+
 def bench_fp16(ckpt: Path, height: int, width: int, iters: int = 50) -> dict:
     """Export ONNX, build a TRT-RTX engine, time it with the official CLI."""
     from nr86.export_onnx import export_onnx

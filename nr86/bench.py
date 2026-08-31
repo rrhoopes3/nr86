@@ -53,6 +53,8 @@ def bench_ckpt(
     dirty_tiles: bool = False,
     max_frames: int = 32,
     try_trt: bool = False,
+    use_trt: bool = False,
+    engine: Path | None = None,
 ) -> dict:
     if data is not None:
         report = bench_sequence(
@@ -63,6 +65,8 @@ def bench_ckpt(
             every_n=every_n,
             dirty_tiles=dirty_tiles,
             max_frames=max_frames,
+            use_trt=use_trt,
+            engine=engine,
         )
     else:
         report = _bench_eager(ckpt, size, warmup, iters, scaling_ratio, every_n)
@@ -170,17 +174,33 @@ def bench_sequence(
     every_n: int = 2,
     dirty_tiles: bool = True,
     max_frames: int = 32,
+    use_trt: bool = False,
+    engine: Path | None = None,
 ) -> dict:
     """Time the path that actually skips frames and dirty tiles."""
     from nr86.dataset import FrameDataset, load_frame, pack_input
     from nr86.runtime import run_frame
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = load_student(ckpt, map_location=device).to(device).eval()
-    spec = model.spec
     ds = FrameDataset(data, require_teacher=False)
     n = min(len(ds), max_frames)
     frames = [load_frame(ds.root, ds.rows[i]) for i in range(n)]
+    backend = "pytorch"
+    engine_path = engine
+    if use_trt or engine is not None:
+        if device.type != "cuda":
+            raise RuntimeError("TensorRT student needs CUDA")
+        from nr86.engine_trt import ensure_engine
+        from nr86.trt_student import load_trt_student
+
+        h, w = frames[0].color.shape[:2]
+        engine_path = engine or ensure_engine(ckpt, h, w)
+        model = load_trt_student(engine_path, ckpt)
+        backend = "tensorrt_rtx"
+    else:
+        model = load_student(ckpt, map_location=device).to(device).eval()
+    spec = model.spec
+    params = count_params(load_student(ckpt, map_location="cpu")) if backend == "tensorrt_rtx" else count_params(model)
     packed = [
         torch.from_numpy(pack_input(fr)).unsqueeze(0).to(device) for fr in frames
     ]
@@ -225,7 +245,9 @@ def bench_sequence(
         "ckpt": str(ckpt),
         "data": str(data),
         "preset": spec.name,
-        "params": count_params(model),
+        "backend": backend,
+        "engine": str(engine_path) if engine_path else None,
+        "params": params,
         "device": str(device),
         "frames": n,
         "every_n": every_n,
@@ -244,7 +266,7 @@ def bench_sequence(
         "min_ms": round(times[0] / max(n, 1), 3),
         "vram_mb": vram,
         "note": (
-            "PyTorch student with actual skip-frame and dirty-tile execution. "
+            f"{backend} student with actual skip-frame and dirty-tile execution. "
             "mean_ms is per frame. tiles_executed is over one pass of the sequence."
         ),
     }

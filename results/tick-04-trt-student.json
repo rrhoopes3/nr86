@@ -1,0 +1,18 @@
+{
+  "tick": 4,
+  "action": "trt_student_in_run_frame",
+  "eval_hybrid": {
+    "delta_psnr": 3.584,
+    "beats_identity": true,
+    "paths": {"fullframe": 12, "fullframe_dirty": 12}
+  },
+  "bench_trt_sequence": {
+    "backend": "tensorrt_rtx",
+    "size": "512x512",
+    "every_n": 2,
+    "dirty_tiles": true,
+    "mean_ms": 6.484,
+    "p95_ms": 6.613,
+    "beats_pytorch_fullframe_10ms": true
+  }
+}

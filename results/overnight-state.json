@@ -1,29 +1,28 @@
 {
   "purpose": "nr86 overnight research toward: student beats identity and reports measured tiles + ms on a 3090",
   "started": "2026-08-31T04:47:00Z",
-  "tick": 3,
-  "next": "real_capture_or_trt_student",
+  "tick": 4,
+  "next": "real_capture",
   "done": [
     "smoke200",
     "diagnose_skip_quality",
     "trt_fp16_720p",
-    "no_ampere_until_skip_is_a_latency_win"
+    "no_ampere_until_skip_is_a_latency_win",
+    "trt_student_in_run_frame"
   ],
-  "blocked_on": ["real_capture_dump", "trt_student_in_run_frame"],
+  "blocked_on": ["real_capture_dump"],
   "do_not": ["ampere400", "int8_qdq", "grow_width"],
-  "notes": "Other Grok was right: 18 ms skip+dirty PyTorch is not cheaper than 10 ms full-frame. Keep every_n=1 for latency until the student is TensorRT. TRT 5.35 ms is GPU compute only. No NVIDIA leak blobs.",
-  "last_started": "2026-08-31T05:19:00Z",
-  "last_finished": "2026-08-31T05:20:00Z",
+  "notes": "TRT student is wired into run_frame. Synth skip+dirty is 6.48 ms/frame and still +3.58 dB. Milestone left: identity on a real capture.",
+  "last_started": "2026-08-31T05:21:00Z",
+  "last_finished": "2026-08-31T05:24:00Z",
   "findings": {
     "smoke200_delta_psnr": 3.584,
     "hybrid_skip_dirty_delta_psnr": 3.584,
     "hybrid_skip_dirty_gate": "pass",
-    "hybrid_paths": {"fullframe": 12, "fullframe_dirty": 12},
-    "hybrid_mean_ms": 17.957,
     "pytorch_fullframe_mean_ms": 10.044,
-    "skip_saves_ms": false,
+    "trt_skip_dirty_512_mean_ms": 6.484,
+    "beats_pytorch_fullframe_ms": true,
     "tensorrt_fp16_858x482_mean_ms": 5.355,
-    "ablations": "depth punch is a teacher leak; do not grow a depth tower",
-    "lesson": "Skip slots now consult the mask. Student frames are full-frame only. Python tiles are gone. every-N is not a PyTorch speedup on this pan. Next is a real capture or a TRT student inside run_frame, not ampere400."
+    "lesson": "TensorRT student plus GPU warp/mask beats 10 ms PyTorch full-frame on synth. Still need one real game dump."
   }
 }

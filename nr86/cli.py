@@ -73,6 +73,8 @@ def main(argv: list[str] | None = None) -> int:
     p_b.add_argument("--dirty-tiles", action="store_true")
     p_b.add_argument("--max-frames", type=int, default=32)
     p_b.add_argument("--try-trt", action="store_true", help="Report TensorRT-RTX FP16 availability")
+    p_b.add_argument("--use-trt", action="store_true", help="Run the student as a TensorRT-RTX engine")
+    p_b.add_argument("--engine", type=Path, default=None)
 
     p_p = sub.add_parser("place", help="Pixel-ops cost (average and worst-case)")
     p_p.add_argument("--preset", choices=sorted(PRESETS), default="ampere")
@@ -170,6 +172,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             dirty_tiles=args.dirty_tiles,
             max_frames=args.max_frames,
             try_trt=args.try_trt,
+            use_trt=args.use_trt,
+            engine=args.engine,
         )
         return 0
     if args.cmd == "place":

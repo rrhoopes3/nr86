@@ -105,3 +105,39 @@ def composite(
 
 def fill_ratio(mask: np.ndarray) -> float:
     return float(np.mean(mask.astype(np.float32)))
+
+
+def warp_nchw(image: "torch.Tensor", mvec: "torch.Tensor") -> "torch.Tensor":
+    """Backward-warp NCHW RGB. mvec is N2HW, dx/W and dy/H."""
+    import torch
+    import torch.nn.functional as F
+
+    _n, _c, h, w = image.shape
+    ys = torch.linspace(-1.0, 1.0, h, device=image.device, dtype=image.dtype)
+    xs = torch.linspace(-1.0, 1.0, w, device=image.device, dtype=image.dtype)
+    grid_y, grid_x = torch.meshgrid(ys, xs, indexing="ij")
+    off_x = mvec[:, 0] * (2.0 * w / max(w - 1, 1))
+    off_y = mvec[:, 1] * (2.0 * h / max(h - 1, 1))
+    grid = torch.stack([grid_x - off_x, grid_y - off_y], dim=-1)
+    return F.grid_sample(image, grid, mode="bilinear", padding_mode="border", align_corners=True)
+
+
+def residual_mask_nchw(color: "torch.Tensor", warped_prev: "torch.Tensor | None", luma_eps: float = 0.02) -> "torch.Tensor":
+    import torch
+
+    if warped_prev is None:
+        n, _c, h, w = color.shape
+        return torch.ones(n, 1, h, w, device=color.device, dtype=torch.bool)
+    wts = color.new_tensor([0.2126, 0.7152, 0.0722]).view(1, 3, 1, 1)
+    luma = (color * wts).sum(dim=1, keepdim=True)
+    prev = (warped_prev * wts).sum(dim=1, keepdim=True)
+    return (luma - prev).abs() >= luma_eps
+
+
+def composite_nchw(student: "torch.Tensor", warped: "torch.Tensor", mask: "torch.Tensor") -> "torch.Tensor":
+    m = mask.to(dtype=student.dtype)
+    if m.ndim == 3:
+        m = m.unsqueeze(1)
+    if m.shape[1] != 1:
+        m = m[:, :1]
+    return student * m + warped * (1.0 - m)
