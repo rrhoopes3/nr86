@@ -96,7 +96,12 @@ def main() -> int:
         if nxt == "smoke200":
             payload["result"] = smoke200()
             state["done"] = list(dict.fromkeys(list(state.get("done") or []) + ["smoke200"]))
-            state["next"] = "ampere400" if payload["result"].get("beats_identity") else "diagnose_smoke"
+            # Do not grow width because smoke already passed identity.
+            state["next"] = (
+                "real_capture_or_trt_student"
+                if payload["result"].get("beats_identity")
+                else "diagnose_smoke"
+            )
         else:
             payload["result"] = {
                 "skipped": True,

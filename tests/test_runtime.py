@@ -88,7 +88,7 @@ def test_dirty_tiles_skip_clean_regions():
         prev_color=None,
         prev_out=None,
         frame_index=0,
-        every_n=1,
+        every_n=2,
         tile=8,
         overlap=0,
         dirty_tiles=True,
@@ -102,16 +102,17 @@ def test_dirty_tiles_skip_clean_regions():
         prev_color=color,
         prev_out=pred0,
         frame_index=1,
-        every_n=1,
+        every_n=2,
         tile=8,
         overlap=0,
         dirty_tiles=True,
     )
     assert s1.tiles_executed == 0
+    assert s1.path == "warp_clean"
     assert net.calls == calls_after_first
 
 
-def test_dirty_tiles_run_changed_corner():
+def test_student_frame_is_always_fullframe():
     net = CountingNet()
     h = w = 16
     prev = np.full((h, w, 3), 0.2, dtype=np.float32)
@@ -133,8 +134,9 @@ def test_dirty_tiles_run_changed_corner():
         overlap=0,
         dirty_tiles=True,
     )
-    assert 1 <= stats.tiles_executed < stats.tiles_total
-    assert net.calls == stats.tiles_executed
+    assert stats.path == "fullframe"
+    assert net.calls == 1
+    assert stats.tiles_executed == stats.tiles_total
 
 
 def test_residual_mask_ignores_pure_camera_pan():
@@ -178,7 +180,8 @@ def test_hybrid_skip_slot_still_runs_when_dirty():
     )
     assert stats.ran_student is True
     assert stats.tiles_executed >= 1
-    assert stats.path in ("dirty_tiles", "fullframe_dirty")
+    assert stats.path == "fullframe_dirty"
+    assert net.calls == 1
 
 
 def test_ablation_zeros_channels():

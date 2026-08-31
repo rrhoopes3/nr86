@@ -1,23 +1,29 @@
 {
   "purpose": "nr86 overnight research toward: student beats identity and reports measured tiles + ms on a 3090",
   "started": "2026-08-31T04:47:00Z",
-  "tick": 2,
-  "next": "ampere400",
-  "done": ["smoke200", "diagnose_skip_quality", "trt_fp16_720p"],
-  "blocked_on": ["real_capture_dump"],
-  "notes": "Do not quote 13x as measured. No INT8 QDQ until a real-capture identity win. No NVIDIA leak blobs. TRT 5.35 ms is GPU compute; CLI had H2D/D2H transfers disabled.",
-  "last_started": "2026-08-31T05:15:37Z",
-  "last_finished": "2026-08-31T05:17:21Z",
+  "tick": 3,
+  "next": "real_capture_or_trt_student",
+  "done": [
+    "smoke200",
+    "diagnose_skip_quality",
+    "trt_fp16_720p",
+    "no_ampere_until_skip_is_a_latency_win"
+  ],
+  "blocked_on": ["real_capture_dump", "trt_student_in_run_frame"],
+  "do_not": ["ampere400", "int8_qdq", "grow_width"],
+  "notes": "Other Grok was right: 18 ms skip+dirty PyTorch is not cheaper than 10 ms full-frame. Keep every_n=1 for latency until the student is TensorRT. TRT 5.35 ms is GPU compute only. No NVIDIA leak blobs.",
+  "last_started": "2026-08-31T05:19:00Z",
+  "last_finished": "2026-08-31T05:20:00Z",
   "findings": {
     "smoke200_delta_psnr": 3.584,
     "hybrid_skip_dirty_delta_psnr": 3.584,
     "hybrid_skip_dirty_gate": "pass",
-    "hybrid_paths": {"fullframe": 1, "fullframe_dirty": 23},
-    "hybrid_executed_frac": 1.0,
-    "hybrid_mean_ms": 18.717,
-    "pytorch_fullframe_mean_ms": 10.007,
+    "hybrid_paths": {"fullframe": 12, "fullframe_dirty": 12},
+    "hybrid_mean_ms": 17.957,
+    "pytorch_fullframe_mean_ms": 10.044,
+    "skip_saves_ms": false,
     "tensorrt_fp16_858x482_mean_ms": 5.355,
-    "tensorrt_fp16": true,
-    "lesson": "Hybrid skip restored the identity gate by running the student on hot residual frames. This synth pan is too dirty to save tiles. TRT-RTX FP16 is 5.35 ms GPU compute at Quality-input 858x482."
+    "ablations": "depth punch is a teacher leak; do not grow a depth tower",
+    "lesson": "Skip slots now consult the mask. Student frames are full-frame only. Python tiles are gone. every-N is not a PyTorch speedup on this pan. Next is a real capture or a TRT student inside run_frame, not ampere400."
   }
 }
