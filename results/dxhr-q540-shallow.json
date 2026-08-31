@@ -4,13 +4,15 @@
   "spec": {"base": 16, "levels": 2, "norm": "gn", "tile": 128},
   "params": 45075,
   "smoke_params": 193043,
-  "ckpt": "runs/dxhr-depth-smoke-q540-shallow/student.pt",
-  "steps": 800,
+  "ckpt": "runs/dxhr-depth-smoke-q540-shallow/student_best.pt",
+  "plateau_steps": 1000,
+  "plateau_peak_steps": 800,
   "quality": {
-    "holdout_last32_full": {"delta_psnr": -0.41, "gate": "fail"},
-    "room2_first32_full": {"delta_psnr": -0.645, "gate": "fail"},
-    "room2_first32_skip_dirty": {"delta_psnr": -0.75, "gate": "fail"}
+    "holdout_last32_full": {"delta_psnr": 0.089, "gate": "fail"},
+    "holdout_last32_skip": {"delta_psnr": 0.073, "gate": "fail"},
+    "room2_first32_full": {"delta_psnr": -0.099, "gate": "fail"},
+    "room2_first32_skip_dirty": {"delta_psnr": -0.29, "gate": "fail"}
   },
-  "lesson": "Same width, one fewer downsample. 45k params vs 193k. 800 steps from scratch lose to identity — expected; GN smoke needed ~1800 for the first hold-out pass. Plateau continues. No TRT until +0.25. No new F9.",
+  "lesson": "Same width, one fewer downsample plateaus at +0.089 hold-out and still loses on the lobby. The extra UNet level is load-bearing. No TRT. Happy path stays 3-level GN smoke at 960x540.",
   "do_not": ["ampere400", "grow_width", "shrink_below_960x540"]
 }

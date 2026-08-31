@@ -6,24 +6,24 @@
   "tick": 3,
   "day_tick": 3,
   "max_ticks": 12,
-  "next": "smoke_shallow_plateau",
+  "next": "combat_f9",
   "done": [
     "gpu_resident_run_frame",
     "cut_pixels_960x540_zeroshot",
     "retrain_q540",
     "int8_qdq_first_cut",
     "smoke_int8_plateau",
-    "smoke_shallow_800"
+    "smoke_shallow_plateau"
   ],
-  "blocked_on": [],
+  "blocked_on": ["combat_f9"],
   "now_eligible": ["combat_f9"],
   "do_not": ["ampere400", "grow_width", "shrink_below_960x540", "qdq_on_failed_nogn"],
-  "notes": "Day tick 3: no new F9. smoke_int8 plateau already done (+0.192, no QDQ). Added smoke_shallow (base=16, levels=2, gn, 45k params). 800 steps: hold-out -0.41, lobby -0.65. Plateau running. Happy path remains GN FP16 smoke at 960x540 (5.03 / 7.64, +0.42).",
+  "notes": "smoke_shallow plateaued at 1000 loop steps, peak +0.089 hold-out / lobby -0.099. Extra UNet level is load-bearing. INT8 and shallower are both dead ends on quality. Happy path: GN FP16 smoke 960x540 (5.03 / 7.64 ms, hold-out +0.42). Next is a combat / fast-turn F9. Do not grow width.",
   "findings": {
     "trt_resident_q540_fp16_mean_ms": 5.034,
     "q540_retrain_holdout_delta": 0.421,
     "smoke_int8_plateau_holdout_delta": 0.192,
-    "smoke_shallow_800_holdout_delta": -0.41,
-    "smoke_shallow_params": 45075
+    "smoke_shallow_plateau_holdout_delta": 0.089,
+    "smoke_shallow_room2_full_delta": -0.099
   }
 }
