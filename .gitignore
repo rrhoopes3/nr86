@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Training / capture artifacts
+runs/
+datasets/
+engines/
+*.engine
+*.trt
+*.cache
+*.onnx
+!docs/**
+
+# CMake / MSVC
+addons/**/out/
+addons/**/build/
+*.user
+*.suo
+.vs/
+
+# Nested full clones (headers are vendored in third_party/reshade-sdk)
+third_party/reshade/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store

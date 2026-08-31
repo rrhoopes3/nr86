@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nr86"
+version = "0.1.0"
+description = "Ampere sm_86 neural-rendering engine: INT8 student, tiled placement, RTXNS track"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "nr86" }]
+dependencies = [
+  "numpy>=1.24",
+  "pillow>=10.0",
+  "torch>=2.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+onnx = ["onnx>=1.16", "onnxruntime>=1.18"]
+trt = ["tensorrt-rtx", "cuda-python"]
+cv = ["opencv-python-headless"]
+
+[project.scripts]
+nr86 = "nr86.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["nr86*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
