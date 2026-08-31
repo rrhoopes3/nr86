@@ -39,6 +39,7 @@ from nr86.reproject import (
     warp_rgb,
 )
 from nr86.tiles import Tile, iter_tiles
+from nr86.envelope import in_envelope, load_envelope
 
 
 @dataclass
@@ -99,6 +100,8 @@ class FrameRunner:
         storm_k: int = 3,
         storm_fill: float = 0.10,
         storm_luma: float = 0.02,
+        envelope: dict | None = None,
+        envelope_path=None,
     ) -> None:
         self.model = model
         self.every_n = every_n
@@ -110,6 +113,9 @@ class FrameRunner:
         self.storm_k = storm_k
         self.storm_fill = storm_fill
         self.storm_luma = storm_luma
+        self.envelope = envelope
+        if self.envelope is None and envelope_path is not None:
+            self.envelope = load_envelope(envelope_path)
         self._have_prev = False
         self._storm = False
         self._high_fill_streak = 0
@@ -208,6 +214,10 @@ class FrameRunner:
     ) -> tuple[np.ndarray, ExecStats]:
         _n, _c, h, w = packed.shape
         n_tiles = len(iter_tiles(h, w, self.tile, self.overlap))
+        if self.envelope is not None and not in_envelope(color, self.envelope):
+            return np.clip(np.ascontiguousarray(color), 0.0, 1.0), ExecStats(
+                n_tiles, 0, False, 0.0, "passthrough"
+            )
         luma = 0.0
         if self._prev_color_np is not None:
             luma = float(
@@ -262,6 +272,17 @@ class FrameRunner:
         h, w = color.shape[:2]
         self._ensure(h, w, device, dtype)
         n_tiles = int(self._n_tiles or 0)
+        if self.envelope is not None and not in_envelope(color, self.envelope):
+            _blit_hwc_to_pinned(self._host_color, color)
+            self._dev_color.copy_(self._host_color, non_blocking=True)
+            out = self._dev_color
+            self._prev_color.copy_(out)
+            self._prev_out.copy_(out)
+            self._have_prev = True
+            stats = ExecStats(n_tiles, 0, False, 0.0, "passthrough")
+            if to_numpy:
+                return nchw_to_hwc(out), stats
+            return out, stats
         _blit_hwc_to_pinned(self._host_color, color)
         self._dev_color.copy_(self._host_color, non_blocking=True)
         color_t = self._dev_color

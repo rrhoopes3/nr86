@@ -57,6 +57,15 @@ python -m nr86 bench --ckpt runs\overnight\smoke200\student.pt --data datasets/q
 is a cost-model lie. Frame 0 of a capture dump has `"prev_color": null`;
 that is valid and must ingest.
 
+**Raw retention.** A DXHR burst is ~0.5 GB raw and a taught city dump
+can be ~10 GB. `B:` hit 9 MB free mid-selfteach; staging deletion
+saved that run. After a taught set evals and is copied to
+`datasets/q540-…`, delete `datasets/_dxhr_*` staging and the matching
+`datasets/raw-dxhr-*` (or move raw off `B:`). Do not keep raw on the
+same volume as overnight trains. The game `nr86_capture\` folder can
+stay; leftover IDs are not new bursts — stage by `meta.json` mtime
+only (`scripts/_stage_by_mtime.py`).
+
 ## Driver notes (Ampere, not Win 11)
 
 HAGS on, current Game Ready driver, NVIDIA App overlay off if it fights

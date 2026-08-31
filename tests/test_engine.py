@@ -53,6 +53,11 @@ def test_presets_param_bands():
     assert 2_000_000 < ampere < 20_000_000
     assert 10_000_000 < target < 50_000_000
     assert smoke < ampere < target
+    probe24 = count_params(build_student("probe24"))
+    probe32 = count_params(build_student("probe32"))
+    assert smoke < probe24 < probe32 < ampere
+    assert build_student("probe24").spec.levels == 3
+    assert build_student("probe32").spec.base == 32
     assert build_student("smoke_shallow").spec.levels == 2
     assert build_student("smoke_shallow").spec.base == 16
     assert any(isinstance(mod, torch.nn.GroupNorm) for mod in build_student("smoke_shallow").modules())

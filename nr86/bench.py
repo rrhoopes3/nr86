@@ -63,6 +63,8 @@ def bench_ckpt(
     engine: Path | None = None,
     int8: bool = False,
     storm: bool = True,
+    envelope: dict | None = None,
+    envelope_path=None,
 ) -> dict:
     if data is not None:
         report = bench_sequence(
@@ -77,6 +79,8 @@ def bench_ckpt(
             engine=engine,
             int8=int8,
             storm=storm,
+            envelope=envelope,
+            envelope_path=envelope_path,
         )
     else:
         report = _bench_eager(ckpt, size, warmup, iters, scaling_ratio, every_n)
@@ -203,6 +207,8 @@ def bench_sequence(
     engine: Path | None = None,
     int8: bool = False,
     storm: bool = True,
+    envelope: dict | None = None,
+    envelope_path=None,
 ) -> dict:
     """Time skip/dirty with prev on device. D2H is off. Color/mvec H2D stays on."""
     from nr86.dataset import FrameDataset, load_frame, pack_input
@@ -243,6 +249,8 @@ def bench_sequence(
         overlap=spec.overlap,
         dirty_tiles=dirty_tiles,
         storm=storm,
+        envelope=envelope,
+        envelope_path=envelope_path,
     )
 
     def run_pass(record: bool) -> tuple[int, int, list[float], dict[str, list[float]], list[float]]:

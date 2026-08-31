@@ -1,0 +1,63 @@
+{
+  "mean_r": {
+    "lo": -0.03,
+    "hi": 0.6352
+  },
+  "mean_g": {
+    "lo": -0.03,
+    "hi": 0.5584
+  },
+  "mean_b": {
+    "lo": -0.03,
+    "hi": 0.491
+  },
+  "std_r": {
+    "lo": -0.03,
+    "hi": 0.4023
+  },
+  "std_g": {
+    "lo": -0.03,
+    "hi": 0.3917
+  },
+  "std_b": {
+    "lo": -0.03,
+    "hi": 0.3711
+  },
+  "mean_spread": {
+    "lo": -0.03,
+    "hi": 0.2741
+  },
+  "pad": 0.03,
+  "n_frames": 392,
+  "sources": [
+    {
+      "data": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-room2",
+      "sampled": 51
+    },
+    {
+      "data": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-holdout",
+      "sampled": 35
+    },
+    {
+      "data": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-combat",
+      "sampled": 60
+    },
+    {
+      "data": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-combat3",
+      "sampled": 40
+    },
+    {
+      "data": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-hangar",
+      "sampled": 73
+    },
+    {
+      "data": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-yard",
+      "sampled": 82
+    },
+    {
+      "data": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-city",
+      "sampled": 51
+    }
+  ],
+  "note": "Gameplay color envelope. Overlay / Smart Vision / post effects that leave these bands pass through as identity."
+}

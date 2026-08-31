@@ -66,6 +66,17 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Disable storm mode (bare full-frame after sustained dirty fill)",
     )
+    p_ev.add_argument(
+        "--envelope",
+        type=Path,
+        default=None,
+        help="Color-stat envelope JSON (default: results/color_envelope.json if present)",
+    )
+    p_ev.add_argument(
+        "--no-envelope",
+        action="store_true",
+        help="Disable overlay pass-through even if an envelope file exists",
+    )
 
     p_e = sub.add_parser("export", help="Export student ONNX")
     p_e.add_argument("--ckpt", type=Path, required=True)
@@ -98,6 +109,17 @@ def main(argv: list[str] | None = None) -> int:
         "--no-storm",
         action="store_true",
         help="Disable storm mode (bare full-frame after sustained dirty fill)",
+    )
+    p_b.add_argument(
+        "--envelope",
+        type=Path,
+        default=None,
+        help="Color-stat envelope JSON (default: results/color_envelope.json if present)",
+    )
+    p_b.add_argument(
+        "--no-envelope",
+        action="store_true",
+        help="Disable overlay pass-through even if an envelope file exists",
     )
 
     p_p = sub.add_parser("place", help="Pixel-ops cost (average and worst-case)")
@@ -188,6 +210,8 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "eval":
         from nr86.eval import evaluate
 
+        from nr86.envelope import resolve_envelope
+
         evaluate(
             args.ckpt,
             args.data,
@@ -200,6 +224,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             offset=args.offset,
             int8=args.int8,
             storm=not args.no_storm,
+            envelope=resolve_envelope(args.envelope, enabled=not args.no_envelope),
         )
         return 0
     if args.cmd == "export":
@@ -221,6 +246,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         return 0
     if args.cmd == "bench":
         from nr86.bench import bench_ckpt
+        from nr86.envelope import resolve_envelope
 
         bench_ckpt(
             args.ckpt,
@@ -237,6 +263,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             engine=args.engine,
             int8=args.int8,
             storm=not args.no_storm,
+            envelope=resolve_envelope(args.envelope, enabled=not args.no_envelope),
         )
         return 0
     if args.cmd == "place":

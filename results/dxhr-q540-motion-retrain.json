@@ -1,0 +1,817 @@
+{
+  "preset": "smoke",
+  "train": "combat_all + holdout_first105",
+  "hud_mask": "dxhr",
+  "data": "datasets\\q540-dxhr-combat3",
+  "extra": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-holdout",
+  "out": "runs\\dxhr-motion-gate",
+  "holdout": "room2 + holdout last32 (other bursts)",
+  "not_holdout": [
+    "combat last32 (same 8s burst)",
+    "leftover capture IDs 000237+"
+  ],
+  "total_steps": 800,
+  "best_combat_first32_delta": -0.3,
+  "best_ckpt": "runs\\dxhr-motion-gate\\student_best.pt",
+  "stop_reason": "max_steps (800)",
+  "history": [
+    {
+      "combat_first32_full": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.248,
+        "delta_psnr": -0.576,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.576 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.183,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_first32_skip": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.509,
+        "delta_psnr": -0.316,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.316 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 13,
+          "fullframe_dirty": 13,
+          "storm": 6
+        },
+        "mask_fill_mean": 0.294,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 28.311,
+        "student_psnr": 28.766,
+        "delta_psnr": 0.454,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.083,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.974,
+        "delta_psnr": 1.459,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.995,
+        "delta_psnr": 1.48,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.133,
+        "delta_psnr": 0.565,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.633,
+        "delta_psnr": 1.065,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "unseen_combat_first32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.858,
+        "delta_psnr": -0.425,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.425 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_first32_skip": {
+        "identity_psnr": 29.283,
+        "student_psnr": 29.23,
+        "delta_psnr": -0.054,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.054 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 14,
+          "fullframe_dirty": 14,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.272,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_head32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.858,
+        "delta_psnr": -0.425,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.425 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_last32_full": {
+        "identity_psnr": 31.419,
+        "student_psnr": 32.75,
+        "delta_psnr": 1.331,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.034,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "steps": 0,
+      "veto": null
+    },
+    {
+      "combat_first32_full": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.213,
+        "delta_psnr": -0.612,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.612 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.183,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_first32_skip": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.464,
+        "delta_psnr": -0.361,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.361 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 13,
+          "fullframe_dirty": 13,
+          "storm": 6
+        },
+        "mask_fill_mean": 0.294,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 28.311,
+        "student_psnr": 28.768,
+        "delta_psnr": 0.457,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.083,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 33.019,
+        "delta_psnr": 1.504,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 33.032,
+        "delta_psnr": 1.517,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.126,
+        "delta_psnr": 0.558,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.625,
+        "delta_psnr": 1.057,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "unseen_combat_first32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.858,
+        "delta_psnr": -0.426,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.426 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_first32_skip": {
+        "identity_psnr": 29.283,
+        "student_psnr": 29.223,
+        "delta_psnr": -0.06,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.060 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 14,
+          "fullframe_dirty": 14,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.272,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_head32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.858,
+        "delta_psnr": -0.426,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.426 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_last32_full": {
+        "identity_psnr": 31.419,
+        "student_psnr": 32.74,
+        "delta_psnr": 1.321,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.034,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "steps": 200,
+      "veto": null
+    },
+    {
+      "combat_first32_full": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.263,
+        "delta_psnr": -0.561,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.561 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.183,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_first32_skip": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.488,
+        "delta_psnr": -0.337,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.337 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 13,
+          "fullframe_dirty": 13,
+          "storm": 6
+        },
+        "mask_fill_mean": 0.294,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 28.311,
+        "student_psnr": 28.731,
+        "delta_psnr": 0.42,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.083,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.97,
+        "delta_psnr": 1.455,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 33.003,
+        "delta_psnr": 1.487,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.135,
+        "delta_psnr": 0.567,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.636,
+        "delta_psnr": 1.068,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "unseen_combat_first32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.863,
+        "delta_psnr": -0.42,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.420 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_first32_skip": {
+        "identity_psnr": 29.283,
+        "student_psnr": 29.206,
+        "delta_psnr": -0.077,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.077 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 14,
+          "fullframe_dirty": 14,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.272,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_head32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.863,
+        "delta_psnr": -0.42,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.420 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_last32_full": {
+        "identity_psnr": 31.419,
+        "student_psnr": 32.674,
+        "delta_psnr": 1.255,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.034,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "steps": 400,
+      "veto": null
+    },
+    {
+      "combat_first32_full": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.3,
+        "delta_psnr": -0.525,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.525 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.183,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_first32_skip": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.525,
+        "delta_psnr": -0.3,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.300 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 13,
+          "fullframe_dirty": 13,
+          "storm": 6
+        },
+        "mask_fill_mean": 0.294,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 28.311,
+        "student_psnr": 28.76,
+        "delta_psnr": 0.449,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.083,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.952,
+        "delta_psnr": 1.437,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.995,
+        "delta_psnr": 1.48,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.152,
+        "delta_psnr": 0.584,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.647,
+        "delta_psnr": 1.079,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "unseen_combat_first32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.852,
+        "delta_psnr": -0.431,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.431 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_first32_skip": {
+        "identity_psnr": 29.283,
+        "student_psnr": 29.199,
+        "delta_psnr": -0.084,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.084 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 14,
+          "fullframe_dirty": 14,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.272,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_head32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.852,
+        "delta_psnr": -0.431,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.431 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_last32_full": {
+        "identity_psnr": 31.419,
+        "student_psnr": 32.718,
+        "delta_psnr": 1.299,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.034,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "steps": 600,
+      "veto": null
+    },
+    {
+      "combat_first32_full": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.139,
+        "delta_psnr": -0.686,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.686 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.183,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_first32_skip": {
+        "identity_psnr": 32.825,
+        "student_psnr": 32.421,
+        "delta_psnr": -0.404,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.404 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 13,
+          "fullframe_dirty": 13,
+          "storm": 6
+        },
+        "mask_fill_mean": 0.294,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "combat_last32_full_leaky": {
+        "identity_psnr": 28.311,
+        "student_psnr": 28.861,
+        "delta_psnr": 0.549,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.083,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "room2_full": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.917,
+        "delta_psnr": 1.402,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.135,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "room2_skip_dirty": {
+        "identity_psnr": 31.515,
+        "student_psnr": 32.947,
+        "delta_psnr": 1.432,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 14,
+          "warp_clean": 9,
+          "fullframe_dirty": 5,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.21,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "holdout_last32_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.152,
+        "delta_psnr": 0.585,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.373,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "holdout_last32_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 26.658,
+        "delta_psnr": 1.09,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 7,
+          "fullframe_dirty": 5,
+          "storm": 19,
+          "warp_clean": 1
+        },
+        "mask_fill_mean": 0.662,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "unseen_combat_first32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.877,
+        "delta_psnr": -0.406,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.406 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_first32_skip": {
+        "identity_psnr": 29.283,
+        "student_psnr": 29.279,
+        "delta_psnr": -0.004,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.004 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 14,
+          "fullframe_dirty": 14,
+          "storm": 4
+        },
+        "mask_fill_mean": 0.272,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_head32_full": {
+        "identity_psnr": 29.283,
+        "student_psnr": 28.877,
+        "delta_psnr": -0.406,
+        "beats_identity": false,
+        "gate": "fail: motion-storm \u0394 -0.406 < 0.00 (must not go negative)",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.195,
+        "regime": "motion",
+        "gate_db": 0.0
+      },
+      "unseen_combat_last32_full": {
+        "identity_psnr": 31.419,
+        "student_psnr": 32.808,
+        "delta_psnr": 1.389,
+        "beats_identity": true,
+        "gate": "pass",
+        "paths": {
+          "fullframe": 32
+        },
+        "mask_fill_mean": 0.034,
+        "regime": "quiet",
+        "gate_db": 0.25
+      },
+      "steps": 800,
+      "veto": null
+    }
+  ],
+  "status": "done",
+  "quality_gate": {
+    "quiet_db": 0.25,
+    "motion_db": 0.0,
+    "motion_score": "skip+dirty (storm) on unseen combat, else train combat skip",
+    "reason": "Temporal masking hides residual detail in an 8s melee burst. Never worse than identity in storms; +0.25 stays the quiet/explorable bar."
+  },
+  "do_not": [
+    "ampere400",
+    "grow_width",
+    "shrink_below_960x540"
+  ],
+  "lesson": "800 HUD-masked steps on combat3+yard+combat1 from city-mix: worst motion skip -0.316 → -0.300 at 600 steps (combat3 skip). Yard skip went -0.054 → -0.084 at that peak and -0.004 at 800 while combat3 fell to -0.404. Quiet held (room2 +1.48, holdout +0.58). The 193k net trades one storm for another; it does not clear ≥ 0.0 on both remaining player-path fails. Next quality lever is capacity, and only if the width×precision timing map fits all-dirty combat under 8.33."
+}

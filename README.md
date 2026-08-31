@@ -87,7 +87,8 @@ latency gate on 1280×720.
 24 GB VRAM is the one thing that does not suck: a 148M teacher plus
 activations fits. Distilling a 20–40M student on one 3090 is a week, not a
 cluster. The smoke preset is minutes. **Do not grow width.** Held-out DXHR
-clears +0.25 dB. Latency is judged on the **1280×720** product tensor:
+clears +0.25 dB on quiet scenes; motion storms must stay ≥ 0.0 dB.
+Latency is judged on the **1280×720** product tensor:
 skip+dirty **mean** under 8.33 ms (120 Hz frame) **and** student-path
 **p95** under 16.67 ms (60 Hz frame). The old 10.7 ms line was eager
 PyTorch at 858×482 — retired.

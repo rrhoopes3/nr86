@@ -1,0 +1,165 @@
+{
+  "quality_gate": {
+    "quiet": 0.25,
+    "motion": 0.0,
+    "overlay": 0.0
+  },
+  "rows": {
+    "citymix_room2_skip": {
+      "delta_psnr": 1.48,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 14,
+        "warp_clean": 9,
+        "fullframe_dirty": 5,
+        "storm": 4
+      },
+      "mask_fill_mean": 0.21,
+      "executed_frac": 0.7188,
+      "ckpt": "runs\\dxhr-city-mix\\student_best.pt"
+    },
+    "citymix_plaza_full": {
+      "delta_psnr": 1.037,
+      "regime": "quiet",
+      "gate_db": 0.25,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 32
+      },
+      "mask_fill_mean": 0.04,
+      "executed_frac": 1.0,
+      "ckpt": "runs\\dxhr-city-mix\\student_best.pt"
+    },
+    "citymix_lookup_full": {
+      "delta_psnr": -0.573,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "fail: motion-storm \u0394 -0.573 < 0.00 (must not go negative)",
+      "paths": {
+        "fullframe": 32
+      },
+      "mask_fill_mean": 0.107,
+      "executed_frac": 1.0,
+      "ckpt": "runs\\dxhr-city-mix\\student_best.pt"
+    },
+    "citymix_lookup_skip": {
+      "delta_psnr": 0.606,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 15,
+        "fullframe_dirty": 14,
+        "storm": 3
+      },
+      "mask_fill_mean": 0.18,
+      "executed_frac": 1.0,
+      "ckpt": "runs\\dxhr-city-mix\\student_best.pt"
+    },
+    "citymix_yard_full": {
+      "delta_psnr": -0.425,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "fail: motion-storm \u0394 -0.425 < 0.00 (must not go negative)",
+      "paths": {
+        "fullframe": 32
+      },
+      "mask_fill_mean": 0.195,
+      "executed_frac": 1.0,
+      "ckpt": "runs\\dxhr-city-mix\\student_best.pt"
+    },
+    "citymix_yard_skip": {
+      "delta_psnr": -0.054,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "fail: motion-storm \u0394 -0.054 < 0.00 (must not go negative)",
+      "paths": {
+        "fullframe": 14,
+        "fullframe_dirty": 14,
+        "storm": 4
+      },
+      "mask_fill_mean": 0.272,
+      "executed_frac": 1.0,
+      "ckpt": "runs\\dxhr-city-mix\\student_best.pt"
+    },
+    "citymix_combat1_skip": {
+      "delta_psnr": 0.216,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 14,
+        "fullframe_dirty": 14,
+        "storm": 4
+      },
+      "mask_fill_mean": 0.269,
+      "executed_frac": 1.0,
+      "ckpt": "runs\\dxhr-city-mix\\student_best.pt"
+    },
+    "citymix_combat3_skip": {
+      "delta_psnr": -0.316,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "fail: motion-storm \u0394 -0.316 < 0.00 (must not go negative)",
+      "paths": {
+        "fullframe": 13,
+        "fullframe_dirty": 13,
+        "storm": 6
+      },
+      "mask_fill_mean": 0.294,
+      "executed_frac": 1.0,
+      "ckpt": "runs\\dxhr-city-mix\\student_best.pt"
+    },
+    "citymix_combat2_sv_last32": {
+      "delta_psnr": 0.0,
+      "regime": "overlay",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "passthrough": 32
+      },
+      "mask_fill_mean": 0.0,
+      "executed_frac": 0.0,
+      "ckpt": "runs\\dxhr-city-mix\\student_best.pt"
+    },
+    "hud2_combat1_skip": {
+      "delta_psnr": 0.104,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 14,
+        "fullframe_dirty": 14,
+        "storm": 4
+      },
+      "mask_fill_mean": 0.269,
+      "executed_frac": 1.0,
+      "ckpt": "runs\\dxhr-combat-hud2\\student_best.pt"
+    },
+    "hud2_combat3_skip": {
+      "delta_psnr": -0.407,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "fail: motion-storm \u0394 -0.407 < 0.00 (must not go negative)",
+      "paths": {
+        "fullframe": 13,
+        "fullframe_dirty": 13,
+        "storm": 6
+      },
+      "mask_fill_mean": 0.294,
+      "executed_frac": 1.0,
+      "ckpt": "runs\\dxhr-combat-hud2\\student_best.pt"
+    }
+  },
+  "fails": [
+    "citymix_lookup_full",
+    "citymix_yard_full",
+    "citymix_yard_skip",
+    "citymix_combat3_skip",
+    "hud2_combat3_skip"
+  ],
+  "note": "citymix_room2_skip was labeled motion in this file because an earlier infer_regime treated any storm path as motion. Fixed: storm is a runtime path; room2 exec 0.72 is quiet and still +1.48. Player-path fails left: yard skip -0.054, combat3 skip -0.316. Look-up full fails but skip +0.606 passes. Smart Vision last32 is passthrough 0.0 / overlay pass. Hangar last32 identity 40.6 / student -8 is a still — not chased.",
+  "status": "measured"
+}

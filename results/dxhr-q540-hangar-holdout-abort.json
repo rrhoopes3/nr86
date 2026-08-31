@@ -1,0 +1,6 @@
+{
+  "status": "aborted",
+  "eval_combat": "datasets/q540-dxhr-hangar",
+  "reason": "Hangar last32 identity is 40.6 dB; city-mix lands at -8.0. That is a still / near-cinematic, not a motion-storm. First 200 steps of the motion-gate retrain chased hangar skip and regressed combat3. Do not use hangar stills as the combat hold-out.",
+  "do_not": ["ampere400", "grow_width", "shrink_below_960x540", "chase_hangar_stills"]
+}

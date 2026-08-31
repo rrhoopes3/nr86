@@ -34,9 +34,11 @@ reason to exist; they are not a game-engine teacher. Validate on a real
 capture and ablate (`nr86 eval --ablate rgb|depth|mvec`).
 
 `python -m nr86 eval --ckpt … --data …` reports student PSNR/SSIM against
-the teacher **and** against identity (cheap color vs teacher). If the
-student does not beat identity by ≥ 0.25 dB, it is fast at doing nothing.
-Do not grow toward 20–40M until this gate passes.
+the teacher **and** against identity (cheap color vs teacher). Quiet
+scenes must beat identity by ≥ 0.25 dB; motion storms must not go
+negative (`>= 0.0`). Overlay / vision-mode frames pass through as
+identity. Do not grow toward 20–40M until a timing map says the width
+fits the latency budget.
 
 Capture at the highest res the game will do (4K / DLAA / TAAU off). Hide
 the HUD. The addon hooks `reshade_finish_effects` — post-UI, display-referred

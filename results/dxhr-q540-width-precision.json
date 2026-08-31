@@ -1,0 +1,390 @@
+{
+  "resolution": "960x540",
+  "data": "B:\\Rando Apps\\Nvda DLSS5 workaround\\datasets\\q540-dxhr-room2",
+  "weights": "random init, never trained",
+  "cells": [
+    {
+      "preset": "probe24",
+      "base": 24,
+      "levels": 3,
+      "norm": "gn",
+      "precision": "fp16",
+      "params": 432987,
+      "skip_dirty_mean_ms": 11.267,
+      "combat_skip_dirty_mean_ms": 15.538,
+      "skip_student_path_p95_ms": 16.033,
+      "combat_student_path_p95_ms": 16.611,
+      "every_n_1_mean_ms": 15.592,
+      "fits_mean_8_33": false,
+      "fits_student_p95_16_67": true,
+      "binding": "combat_all_dirty",
+      "lobby_skip": {
+        "mean_ms": 11.267,
+        "student_path_ms": {
+          "n": 184,
+          "mean_ms": 14.941,
+          "p95_ms": 16.033,
+          "max_ms": 16.624,
+          "min_ms": 13.121
+        },
+        "path_ms": {
+          "fullframe": {
+            "n": 112,
+            "mean_ms": 15.059,
+            "p95_ms": 15.993,
+            "max_ms": 16.624,
+            "min_ms": 13.306
+          },
+          "fullframe_dirty": {
+            "n": 40,
+            "mean_ms": 15.35,
+            "p95_ms": 16.313,
+            "max_ms": 16.475,
+            "min_ms": 14.517
+          },
+          "storm": {
+            "n": 32,
+            "mean_ms": 14.015,
+            "p95_ms": 14.746,
+            "max_ms": 14.824,
+            "min_ms": 13.121
+          },
+          "warp_clean": {
+            "n": 72,
+            "mean_ms": 1.878,
+            "p95_ms": 2.394,
+            "max_ms": 3.509,
+            "min_ms": 1.361
+          }
+        }
+      },
+      "combat_skip": {
+        "mean_ms": 15.538,
+        "student_path_ms": {
+          "n": 256,
+          "mean_ms": 15.538,
+          "p95_ms": 16.611,
+          "max_ms": 17.13,
+          "min_ms": 13.783
+        },
+        "path_ms": {
+          "fullframe": {
+            "n": 112,
+            "mean_ms": 15.67,
+            "p95_ms": 16.556,
+            "max_ms": 17.13,
+            "min_ms": 14.335
+          },
+          "fullframe_dirty": {
+            "n": 112,
+            "mean_ms": 15.702,
+            "p95_ms": 16.626,
+            "max_ms": 16.853,
+            "min_ms": 14.85
+          },
+          "storm": {
+            "n": 32,
+            "mean_ms": 14.498,
+            "p95_ms": 15.351,
+            "max_ms": 15.496,
+            "min_ms": 13.783
+          }
+        }
+      },
+      "note": "junk weights, timing only. Binding constraint is all-dirty combat."
+    },
+    {
+      "preset": "probe24_int8",
+      "base": 24,
+      "levels": 3,
+      "norm": "none",
+      "precision": "int8_qdq",
+      "params": 432315,
+      "skip_dirty_mean_ms": 8.768,
+      "combat_skip_dirty_mean_ms": 11.518,
+      "skip_student_path_p95_ms": 12.038,
+      "combat_student_path_p95_ms": 12.256,
+      "every_n_1_mean_ms": 11.61,
+      "fits_mean_8_33": false,
+      "fits_student_p95_16_67": true,
+      "binding": "combat_all_dirty",
+      "lobby_skip": {
+        "mean_ms": 8.768,
+        "student_path_ms": {
+          "n": 184,
+          "mean_ms": 11.364,
+          "p95_ms": 12.038,
+          "max_ms": 12.801,
+          "min_ms": 9.81
+        },
+        "path_ms": {
+          "fullframe": {
+            "n": 112,
+            "mean_ms": 11.491,
+            "p95_ms": 12.116,
+            "max_ms": 12.801,
+            "min_ms": 9.956
+          },
+          "fullframe_dirty": {
+            "n": 40,
+            "mean_ms": 11.525,
+            "p95_ms": 12.038,
+            "max_ms": 12.334,
+            "min_ms": 10.76
+          },
+          "storm": {
+            "n": 32,
+            "mean_ms": 10.718,
+            "p95_ms": 11.211,
+            "max_ms": 11.401,
+            "min_ms": 9.81
+          },
+          "warp_clean": {
+            "n": 72,
+            "mean_ms": 2.134,
+            "p95_ms": 2.407,
+            "max_ms": 2.73,
+            "min_ms": 1.358
+          }
+        }
+      },
+      "combat_skip": {
+        "mean_ms": 11.518,
+        "student_path_ms": {
+          "n": 256,
+          "mean_ms": 11.518,
+          "p95_ms": 12.256,
+          "max_ms": 13.127,
+          "min_ms": 9.921
+        },
+        "path_ms": {
+          "fullframe": {
+            "n": 112,
+            "mean_ms": 11.59,
+            "p95_ms": 12.218,
+            "max_ms": 12.923,
+            "min_ms": 10.616
+          },
+          "fullframe_dirty": {
+            "n": 112,
+            "mean_ms": 11.637,
+            "p95_ms": 12.39,
+            "max_ms": 13.127,
+            "min_ms": 10.615
+          },
+          "storm": {
+            "n": 32,
+            "mean_ms": 10.846,
+            "p95_ms": 11.333,
+            "max_ms": 11.47,
+            "min_ms": 9.921
+          }
+        }
+      },
+      "note": "junk weights, timing only. Binding constraint is all-dirty combat."
+    },
+    {
+      "preset": "probe32",
+      "base": 32,
+      "levels": 3,
+      "norm": "gn",
+      "precision": "fp16",
+      "params": 768547,
+      "skip_dirty_mean_ms": 10.88,
+      "combat_skip_dirty_mean_ms": 14.323,
+      "skip_student_path_p95_ms": 15.164,
+      "combat_student_path_p95_ms": 15.239,
+      "every_n_1_mean_ms": 14.279,
+      "fits_mean_8_33": false,
+      "fits_student_p95_16_67": true,
+      "binding": "combat_all_dirty",
+      "lobby_skip": {
+        "mean_ms": 10.88,
+        "student_path_ms": {
+          "n": 184,
+          "mean_ms": 14.21,
+          "p95_ms": 15.164,
+          "max_ms": 17.703,
+          "min_ms": 10.527
+        },
+        "path_ms": {
+          "fullframe": {
+            "n": 112,
+            "mean_ms": 14.287,
+            "p95_ms": 15.164,
+            "max_ms": 16.117,
+            "min_ms": 11.263
+          },
+          "fullframe_dirty": {
+            "n": 40,
+            "mean_ms": 14.454,
+            "p95_ms": 15.34,
+            "max_ms": 17.703,
+            "min_ms": 10.527
+          },
+          "storm": {
+            "n": 32,
+            "mean_ms": 13.634,
+            "p95_ms": 14.004,
+            "max_ms": 14.519,
+            "min_ms": 12.668
+          },
+          "warp_clean": {
+            "n": 72,
+            "mean_ms": 2.371,
+            "p95_ms": 2.87,
+            "max_ms": 8.392,
+            "min_ms": 1.629
+          }
+        }
+      },
+      "combat_skip": {
+        "mean_ms": 14.323,
+        "student_path_ms": {
+          "n": 256,
+          "mean_ms": 14.323,
+          "p95_ms": 15.239,
+          "max_ms": 15.922,
+          "min_ms": 12.505
+        },
+        "path_ms": {
+          "fullframe": {
+            "n": 112,
+            "mean_ms": 14.355,
+            "p95_ms": 15.058,
+            "max_ms": 15.261,
+            "min_ms": 12.92
+          },
+          "fullframe_dirty": {
+            "n": 112,
+            "mean_ms": 14.5,
+            "p95_ms": 15.347,
+            "max_ms": 15.922,
+            "min_ms": 13.144
+          },
+          "storm": {
+            "n": 32,
+            "mean_ms": 13.587,
+            "p95_ms": 13.985,
+            "max_ms": 14.072,
+            "min_ms": 12.505
+          }
+        }
+      },
+      "note": "junk weights, timing only. Binding constraint is all-dirty combat."
+    },
+    {
+      "preset": "probe32_int8",
+      "base": 32,
+      "levels": 3,
+      "norm": "none",
+      "precision": "int8_qdq",
+      "params": 767651,
+      "skip_dirty_mean_ms": 10.026,
+      "combat_skip_dirty_mean_ms": 13.344,
+      "skip_student_path_p95_ms": 14.107,
+      "combat_student_path_p95_ms": 14.076,
+      "every_n_1_mean_ms": 13.744,
+      "fits_mean_8_33": false,
+      "fits_student_p95_16_67": true,
+      "binding": "combat_all_dirty",
+      "lobby_skip": {
+        "mean_ms": 10.026,
+        "student_path_ms": {
+          "n": 184,
+          "mean_ms": 13.17,
+          "p95_ms": 14.107,
+          "max_ms": 14.909,
+          "min_ms": 11.793
+        },
+        "path_ms": {
+          "fullframe": {
+            "n": 112,
+            "mean_ms": 13.284,
+            "p95_ms": 14.096,
+            "max_ms": 14.909,
+            "min_ms": 11.819
+          },
+          "fullframe_dirty": {
+            "n": 40,
+            "mean_ms": 13.439,
+            "p95_ms": 14.177,
+            "max_ms": 14.544,
+            "min_ms": 12.291
+          },
+          "storm": {
+            "n": 32,
+            "mean_ms": 12.432,
+            "p95_ms": 13.176,
+            "max_ms": 13.351,
+            "min_ms": 11.793
+          },
+          "warp_clean": {
+            "n": 72,
+            "mean_ms": 1.992,
+            "p95_ms": 2.455,
+            "max_ms": 2.536,
+            "min_ms": 1.341
+          }
+        }
+      },
+      "combat_skip": {
+        "mean_ms": 13.344,
+        "student_path_ms": {
+          "n": 256,
+          "mean_ms": 13.344,
+          "p95_ms": 14.076,
+          "max_ms": 14.445,
+          "min_ms": 11.667
+        },
+        "path_ms": {
+          "fullframe": {
+            "n": 112,
+            "mean_ms": 13.456,
+            "p95_ms": 14.098,
+            "max_ms": 14.445,
+            "min_ms": 12.34
+          },
+          "fullframe_dirty": {
+            "n": 112,
+            "mean_ms": 13.512,
+            "p95_ms": 14.063,
+            "max_ms": 14.246,
+            "min_ms": 12.591
+          },
+          "storm": {
+            "n": 32,
+            "mean_ms": 12.361,
+            "p95_ms": 12.873,
+            "max_ms": 13.261,
+            "min_ms": 11.667
+          }
+        }
+      },
+      "note": "junk weights, timing only. Binding constraint is all-dirty combat."
+    }
+  ],
+  "smoke_fp16_real_weights_cold": {
+    "preset": "smoke",
+    "base": 16,
+    "levels": 3,
+    "precision": "fp16",
+    "params": 193043,
+    "skip_dirty_mean_ms": 6.42,
+    "combat_skip_dirty_mean_ms": 8.004,
+    "every_n_1_mean_ms": 8.2,
+    "fits_mean_8_33": true,
+    "note": "Trained GN weights, dxhr closed. Reference row, not junk."
+  },
+  "affordable_under_8_33_16_67": [],
+  "lesson": "INT8 starts paying at base-24 (lobby 11.27→8.77, combat 15.54→11.52) — the convs are math-bound, as predicted. It still misses 8.33 on all-dirty combat by 3.2 ms. base-32 INT8 is slower than base-24 INT8 (combat 13.34). Smoke 16/FP16 remains the only graph under the two-sided gate (cold combat skip 8.004). Keep grow_width. Do not train probe24/32. Do not cite junk-QDQ ms as quality.",
+  "do_not": [
+    "ampere400",
+    "grow_width",
+    "shrink_below_960x540"
+  ],
+  "do_not_quality_claim": [
+    "junk_qdq_width_probe"
+  ],
+  "status": "done"
+}

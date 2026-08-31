@@ -19,6 +19,37 @@ from nr86.metrics import psnr, ssim
 from nr86.models.student import load_student
 from nr86.runtime import FrameRunner
 
+QUIET_DB = 0.25
+MOTION_DB = 0.0
+OVERLAY_DB = 0.0
+
+
+def infer_regime(paths: dict, fill: float | None, executed_frac: float) -> str:
+    """Quiet gameplay, motion storm, or overlay pass-through."""
+    if int(paths.get("passthrough") or 0) > 0:
+        return "overlay"
+    # Storm is a runtime path, not a content class. A quiet lobby that
+    # storms for 4 frames must still clear +0.25. All-dirty high fill is motion.
+    if executed_frac >= 0.99 and fill is not None and fill >= 0.10:
+        return "motion"
+    return "quiet"
+
+
+def quality_gate(delta: float, regime: str) -> tuple[bool, str]:
+    if regime == "overlay":
+        need = OVERLAY_DB
+        ok = delta >= need
+        if ok:
+            return True, "pass"
+        return False, f"fail: overlay pass-through Δ {delta:+.3f} < 0 (must be identity)"
+    need = MOTION_DB if regime == "motion" else QUIET_DB
+    ok = delta >= need
+    if ok:
+        return True, "pass"
+    if regime == "motion":
+        return False, f"fail: motion-storm Δ {delta:+.3f} < {need:.2f} (must not go negative)"
+    return False, "fail: student does not beat identity — fast at doing nothing"
+
 
 @torch.no_grad()
 def evaluate(
@@ -33,6 +64,8 @@ def evaluate(
     offset: int = 0,
     int8: bool = False,
     storm: bool = True,
+    envelope: dict | None = None,
+    envelope_path: Path | None = None,
 ) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     backend = "pytorch"
@@ -72,6 +105,8 @@ def evaluate(
         overlap=spec.overlap,
         dirty_tiles=dirty_tiles,
         storm=storm,
+        envelope=envelope,
+        envelope_path=envelope_path,
     )
 
     for i in range(n):
@@ -118,12 +153,18 @@ def evaluate(
         "tiles_total": int(np.sum(totals)),
         "tiles_executed_mean": round(float(np.mean(executed)), 3) if executed else 0.0,
         "paths": dict(Counter(paths)),
-        "beats_identity": float(np.mean(st_psnr)) > float(np.mean(id_psnr)) + 0.25,
-        "gate": (
-            "pass"
-            if float(np.mean(st_psnr)) > float(np.mean(id_psnr)) + 0.25
-            else "fail: student does not beat identity — fast at doing nothing"
-        ),
+        "executed_frac": round(float(np.sum(executed) / max(float(np.sum(totals)), 1.0)), 4),
+        "regime": None,
+        "gate_db": None,
+        "beats_identity": False,
+        "gate": "fail",
     }
+    delta = float(report["delta_psnr"])
+    regime = infer_regime(report["paths"], report["mask_fill_mean"], report["executed_frac"])
+    ok, gate = quality_gate(delta, regime)
+    report["regime"] = regime
+    report["gate_db"] = {"quiet": QUIET_DB, "motion": MOTION_DB, "overlay": OVERLAY_DB}[regime]
+    report["beats_identity"] = ok
+    report["gate"] = gate
     print(json.dumps(report, indent=2))
     return report

@@ -51,6 +51,16 @@ PRESETS: dict[str, StudentSpec] = {
     "smoke_shallow": StudentSpec(
         name="smoke_shallow", base=16, levels=2, tile=128, overlap=16, norm="gn"
     ),
+    # Timing probes only. Same 3-level smoke graph, wider base. Do not train
+    # these until scripts/width_precision_map.py says the ms fit the budget.
+    "probe24": StudentSpec(name="probe24", base=24, levels=3, tile=128, overlap=16, norm="gn"),
+    "probe24_int8": StudentSpec(
+        name="probe24_int8", base=24, levels=3, tile=128, overlap=16, norm="none"
+    ),
+    "probe32": StudentSpec(name="probe32", base=32, levels=3, tile=128, overlap=16, norm="gn"),
+    "probe32_int8": StudentSpec(
+        name="probe32_int8", base=32, levels=3, tile=128, overlap=16, norm="none"
+    ),
     "ampere": StudentSpec(name="ampere", base=32, levels=4, tile=256, overlap=16, norm="gn"),
     "ampere_int8": StudentSpec(
         name="ampere_int8", base=32, levels=4, tile=256, overlap=16, norm="none"

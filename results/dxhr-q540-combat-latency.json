@@ -1,9 +1,9 @@
 {
-  "scene": "paired lobby vs combat TRT re-bench (Fable item 1)",
+  "scene": "paired lobby vs combat TRT re-bench (Fable item 1) + cold close-out",
   "ckpt": "runs/dxhr-depth-smoke-q540/student_best.pt",
   "engine": "engines/student_960x540_1ae115ab73.engine",
   "dxhr_open_during_bench": true,
-  "note": "Game was still open (same 3090). This is not a cold re-bench. Close dxhr.exe and re-run to get the 6.4-class student number.",
+  "note": "Game-open pair is retained. Cold block below was measured with dxhr.exe not running.",
   "paired_game_open": {
     "lobby_skip_dirty_mean_ms": 7.425,
     "lobby_student_path_mean_ms": 9.41,
@@ -25,13 +25,29 @@
       "fullframe_dirty": 10.914,
       "storm": 9.425
     },
-    "lesson": "Storm fires and drops warp/mask/composite (~1.5 ms vs dirty on a hot GPU). Mean still misses 8.33 while the game is open. Storm cannot invent the cold 6.4."
+    "lesson": "Storm fires and drops warp/mask/composite (~1.5 ms vs dirty on a hot GPU). Mean still misses 8.33 while the game is open. Storm cannot invent the cold number."
   },
   "quality_with_storm": {
     "combat_skip_delta_psnr": -0.172,
     "lobby_skip_delta_psnr": 1.527,
     "lobby_paths": {"fullframe": 14, "warp_clean": 9, "fullframe_dirty": 5, "storm": 4}
   },
-  "lesson": "Fable was right that the 56% combat-vs-lobby student gap was environment, not the graph. Paired every-n=1 is 11.425 vs 11.462 ms (scene-independent). Student-path skip is 9.41 lobby vs 9.66 combat. Combat still fails the mean because executed_frac is 1.0 (no warp_clean) on a contended GPU. Cold, student ~6.4 would put even all-dirty combat under 8.33; storm is the right runtime policy either way. Quality is the real fail.",
+  "cold_dxhr_closed": {
+    "dxhr_open_during_bench": false,
+    "measured": true,
+    "lobby_skip_dirty_mean_ms": 6.42,
+    "lobby_student_path_mean_ms": 8.115,
+    "lobby_student_path_p95_ms": 8.796,
+    "lobby_every_n_1_mean_ms": 8.291,
+    "combat_skip_dirty_mean_ms": 8.004,
+    "combat_student_path_mean_ms": 8.004,
+    "combat_student_path_p95_ms": 8.749,
+    "combat_every_n_1_mean_ms": 8.2,
+    "combat_executed_frac": 1.0,
+    "combat_skip_latency_gate": "pass",
+    "lobby_skip_latency_gate": "pass",
+    "note": "All-dirty combat skip mean 8.004 <= 8.333. The earlier 6.4 was a clean-session lobby student-path, not this cold every-n=1 (8.20 combat / 8.29 lobby). Scene-independent again."
+  },
+  "lesson": "Fable was right that the 56% combat-vs-lobby student gap was environment, not the graph. Game-open every-n=1 is 11.425 vs 11.462; cold every-n=1 is 8.200 vs 8.291 (still scene-independent). Cold all-dirty combat skip 8.004 ms clears 8.33; student-path p95 8.75 clears 16.67. The asserted-not-measured 6.4-implies-under-8.33 is now a measured pass, even though this cold student is ~8.2 not 6.4. Quality is the remaining fail class.",
   "do_not": ["ampere400", "grow_width", "shrink_below_960x540"]
 }
