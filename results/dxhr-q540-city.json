@@ -1,0 +1,137 @@
+{
+  "scene": "afternoon F9 batch; city outside is the hold-out",
+  "leftover_not_ingested": "000293+ morning leftovers; also skipped cinematic bursts",
+  "newest_is": "Detroit night plaza + look-up (b8, 15:21:36-15:21:52, 388 frames)",
+  "bursts": [
+    {
+      "id": "b0",
+      "when": "15:00:02-15:00:07",
+      "n": 133,
+      "kind": "gameplay",
+      "note": "factory office, gun on NPC back"
+    },
+    {
+      "id": "b1",
+      "when": "15:02:16-15:02:24",
+      "n": 251,
+      "kind": "gameplay",
+      "note": "hologram / window toward city"
+    },
+    {
+      "id": "b2a",
+      "when": "15:07:20-15:07:47",
+      "n": 562,
+      "kind": "cinematic",
+      "ingested": false,
+      "note": "eye close-up cutscene"
+    },
+    {
+      "id": "b2b",
+      "when": "15:07:55-15:08:12",
+      "n": 420,
+      "kind": "cinematic",
+      "ingested": false,
+      "note": "wounded-face cutscene"
+    },
+    {
+      "id": "b3",
+      "when": "15:10:47-15:10:59",
+      "n": 341,
+      "kind": "cinematic",
+      "ingested": false,
+      "note": "Jensen interrogation"
+    },
+    {
+      "id": "b4",
+      "when": "15:12:04-15:12:12",
+      "n": 205,
+      "kind": "cinematic",
+      "ingested": false,
+      "note": "Zeke Sanders hostage"
+    },
+    {
+      "id": "b5",
+      "when": "15:15:16-15:15:29",
+      "n": 326,
+      "kind": "gameplay",
+      "taught": "datasets/q540-dxhr-yard",
+      "note": "factory yard SWAT then hangar/Malik"
+    },
+    {
+      "id": "b6",
+      "when": "15:15:56-15:16:07",
+      "n": 291,
+      "kind": "gameplay",
+      "taught": "datasets/q540-dxhr-hangar",
+      "note": "helipad VTOL"
+    },
+    {
+      "id": "b7",
+      "when": "15:19:03-15:19:10",
+      "n": 184,
+      "kind": "cinematic",
+      "ingested": false,
+      "note": "Sarif office dialogue"
+    },
+    {
+      "id": "b8city",
+      "when": "15:21:36-15:21:52",
+      "n": 388,
+      "kind": "gameplay",
+      "taught": "datasets/q540-dxhr-city",
+      "note": "Detroit night plaza, look-up at SARIF / CYBERBOOST towers. Hold-out."
+    }
+  ],
+  "depth": "all backup=1",
+  "holdout": "q540-dxhr-city (whole burst, other space)",
+  "train_mix": "existing combat + yard + hangar + holdout first105",
+  "skipped_cinematics": true,
+  "do_not": [
+    "ampere400",
+    "grow_width",
+    "shrink_below_960x540"
+  ],
+  "zero_shot_hud2": {
+    "ckpt": "runs/dxhr-combat-hud2/student_best.pt",
+    "city_first32": {
+      "delta_psnr": 0.915,
+      "gate": "pass",
+      "mask_fill": 0.04
+    },
+    "city_skip": {
+      "delta_psnr": 0.893,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 16,
+        "fullframe_dirty": 4,
+        "warp_clean": 12
+      }
+    },
+    "city_last32_lookup": {
+      "delta_psnr": -0.657,
+      "gate": "fail",
+      "note": "look-up at towers / fog"
+    },
+    "yard_first32": {
+      "delta_psnr": -0.603,
+      "gate": "fail"
+    }
+  },
+  "zero_shot_q540_orig": {
+    "city_first32": {
+      "delta_psnr": 0.765,
+      "gate": "pass"
+    }
+  },
+  "disk": "B: was at 9MB free; deleted _dxhr_* staging copies (game capture remains). Hangar selfteach retried.",
+  "retrain": {
+    "out": "runs/dxhr-city-mix/student_best.pt",
+    "peak_steps": 1400,
+    "city_lookup_full": -0.573,
+    "city_lookup_skip": 0.606,
+    "city_plaza_head32": 1.037,
+    "yard_first32": -0.425,
+    "room2_skip": 1.48
+  },
+  "lesson": "Detroit plaza already passed zero-shot (+0.92 / skip +0.89, 12 warp_clean) on the warehouse-trained student \u2014 different-space quiet gameplay generalizes. Look-up at towers fails full-frame (-0.66) but skip already passes (+0.51). Yard/SWAT still fails like warehouse combat. Mix of yard+combat+hangar moved look-up to -0.57 and yard to -0.43; plaza held at +1.04. Cinematics were not ingested. B: hit 9MB free during hangar selfteach; staging copies deleted."
+}

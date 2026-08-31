@@ -3,10 +3,10 @@
   "started": "2026-08-31T18:37:00Z",
   "loop": "running",
   "loop_name": "nr86day",
-  "tick": 6,
-  "day_tick": 6,
+  "tick": 8,
+  "day_tick": 8,
   "max_ticks": 12,
-  "next": "different_space_combat_f9",
+  "next": "city_combat_or_idle",
   "done": [
     "gpu_resident_run_frame",
     "cut_pixels_960x540_zeroshot",
@@ -20,19 +20,23 @@
     "combat_retrain_hud_burst_holdout",
     "int8_timing_only",
     "ingest_combat2_combat3",
-    "combat2_3_retrain"
+    "combat2_3_retrain",
+    "ingest_city_yard_hangar",
+    "city_mix_retrain"
   ],
-  "blocked_on": ["different_space_combat_f9"],
-  "now_eligible": ["ingest_new_combat_burst_if_f9_other_room"],
+  "blocked_on": [],
+  "now_eligible": ["city_hostile_f9_if_user_wants"],
   "do_not": ["ampere400", "grow_width", "shrink_below_960x540"],
   "do_not_quality_claim": ["qdq_on_failed_nogn"],
-  "notes": "Tick 6 done. Two new warehouse F9s ingested (mtime only; leftover 000293+ skipped). Mix combat1+2 plateaued: unseen combat3 first32 -0.638 (from -0.682). Takedown last32 already passes. Combat2 skip+storm was already +1.15; Smart Vision last32 is -2.69 native overlay. Same warehouse is exhausted. Next F9 should be a different space. Do not grow width.",
+  "notes": "Tick 8: afternoon F9s. City plaza zero-shot +0.92 / skip +0.89 (pass, 12 warp_clean) on hud2. City look-up fails full (-0.66) but skip passes. Yard -0.60. Cinematics skipped. Mix 1600 steps: look-up -0.57, yard -0.43, plaza +1.04. B: was 9MB free; deleted _dxhr_* staging. Do not grow width.",
   "findings": {
-    "combat2_skip_storm_delta": 1.146,
-    "combat2_last32_smart_vision_delta": -2.691,
-    "combat3_first32_delta_before": -0.682,
-    "combat3_first32_delta_after_mix": -0.638,
-    "combat3_last32_takedown_delta": 0.309,
-    "room2_skip_after_mix": 1.403
+    "city_plaza_first32_delta": 0.915,
+    "city_plaza_skip_delta": 0.893,
+    "city_lookup_last32_delta": -0.657,
+    "city_lookup_after_mix": -0.573,
+    "city_plaza_after_mix": 1.037,
+    "yard_first32_delta": -0.603,
+    "yard_after_mix": -0.425,
+    "city_warp_clean_first32": 12
   }
 }

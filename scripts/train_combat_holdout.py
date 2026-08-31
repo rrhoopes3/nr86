@@ -69,6 +69,12 @@ def _parse() -> argparse.Namespace:
         default=None,
         help="Unseen combat burst used as the primary combat gate (not last-32 of train)",
     )
+    p.add_argument(
+        "--eval-combat-offset",
+        type=int,
+        default=0,
+        help="Start frame on --eval-combat (e.g. last-32 of a look-up). Offset 0 is also recorded as a veto.",
+    )
     return p.parse_args()
 
 
@@ -107,10 +113,14 @@ def _eval_suite(ckpt: Path, args: argparse.Namespace) -> dict:
     }
     if args.eval_combat is not None:
         n_unseen = len(FrameDataset(args.eval_combat, require_teacher=True))
-        unseen_first = evaluate(ckpt, args.eval_combat, max_frames=32, offset=0, every_n=1)
-        unseen_skip = evaluate(
-            ckpt, args.eval_combat, max_frames=32, offset=0, every_n=2, dirty_tiles=True
+        off = max(0, int(args.eval_combat_offset))
+        unseen_gate = evaluate(
+            ckpt, args.eval_combat, max_frames=32, offset=off, every_n=1
         )
+        unseen_skip = evaluate(
+            ckpt, args.eval_combat, max_frames=32, offset=off, every_n=2, dirty_tiles=True
+        )
+        unseen_head = evaluate(ckpt, args.eval_combat, max_frames=32, offset=0, every_n=1)
         unseen_last = evaluate(
             ckpt,
             args.eval_combat,
@@ -118,8 +128,9 @@ def _eval_suite(ckpt: Path, args: argparse.Namespace) -> dict:
             offset=max(0, n_unseen - 32),
             every_n=1,
         )
-        out["unseen_combat_first32_full"] = _brief(unseen_first)
+        out["unseen_combat_first32_full"] = _brief(unseen_gate)
         out["unseen_combat_first32_skip"] = _brief(unseen_skip)
+        out["unseen_combat_head32_full"] = _brief(unseen_head)
         out["unseen_combat_last32_full"] = _brief(unseen_last)
     return out
 
@@ -132,6 +143,9 @@ def _veto(row: dict) -> str | None:
         fails.append(f"room2 skip {room2:+.3f} < {VETO_DB}")
     if hold < VETO_DB:
         fails.append(f"holdout last32 {hold:+.3f} < {VETO_DB}")
+    head = row.get("unseen_combat_head32_full")
+    if head is not None and float(head["delta_psnr"]) < VETO_DB:
+        fails.append(f"unseen head32 {float(head['delta_psnr']):+.3f} < {VETO_DB}")
     return None if not fails else "; ".join(fails)
 
 
