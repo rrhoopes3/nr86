@@ -154,6 +154,33 @@ def test_residual_mask_flags_unexplained_change():
     assert fill_ratio(mask) > 0.4
 
 
+def test_hybrid_skip_slot_still_runs_when_dirty():
+    net = CountingNet()
+    h = w = 16
+    prev = np.full((h, w, 3), 0.2, dtype=np.float32)
+    color = prev.copy()
+    color[:8, :8] = 0.9
+    depth = np.zeros((h, w), dtype=np.float32)
+    mvec = np.zeros((h, w, 2), dtype=np.float32)
+    x = _packed(color, depth, mvec)
+    _pred, stats = run_frame(
+        net,
+        x,
+        color=color,
+        mvec=mvec,
+        prev_color=prev,
+        prev_out=prev,
+        frame_index=1,
+        every_n=2,
+        tile=8,
+        overlap=0,
+        dirty_tiles=True,
+    )
+    assert stats.ran_student is True
+    assert stats.tiles_executed >= 1
+    assert stats.path in ("dirty_tiles", "fullframe_dirty")
+
+
 def test_ablation_zeros_channels():
     packed = np.ones((6, 4, 4), dtype=np.float32)
     rgb = apply_ablation(packed, "rgb")

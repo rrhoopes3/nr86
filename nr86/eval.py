@@ -8,6 +8,7 @@ network is not executed on frames / tiles that should have been skipped.
 from __future__ import annotations
 
 import json
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -40,6 +41,7 @@ def evaluate(
     fills: list[float] = []
     executed: list[int] = []
     totals: list[int] = []
+    paths: list[str] = []
     prev_rgb: np.ndarray | None = None
     prev_out: np.ndarray | None = None
 
@@ -65,6 +67,7 @@ def evaluate(
         fills.append(stats.mask_fill)
         executed.append(stats.tiles_executed)
         totals.append(stats.tiles_total)
+        paths.append(stats.path)
         id_psnr.append(psnr(frame.color, teacher))
         st_psnr.append(psnr(pred, teacher))
         id_ssim.append(ssim(frame.color, teacher))
@@ -89,6 +92,7 @@ def evaluate(
         "tiles_executed": int(np.sum(executed)),
         "tiles_total": int(np.sum(totals)),
         "tiles_executed_mean": round(float(np.mean(executed)), 3) if executed else 0.0,
+        "paths": dict(Counter(paths)),
         "beats_identity": float(np.mean(st_psnr)) > float(np.mean(id_psnr)) + 0.25,
         "gate": (
             "pass"

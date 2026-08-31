@@ -1,0 +1,24 @@
+{
+  "tick": 2,
+  "action": "diagnose_skip_quality + trt_fp16_720p",
+  "eval_hybrid": {
+    "every_n": 2,
+    "dirty_tiles": true,
+    "identity_psnr": 22.21,
+    "student_psnr": 25.794,
+    "delta_psnr": 3.584,
+    "beats_identity": true,
+    "tiles_executed": 600,
+    "tiles_total": 600,
+    "paths": {"fullframe": 1, "fullframe_dirty": 23}
+  },
+  "bench_hybrid_mean_ms": 18.717,
+  "pytorch_fullframe_mean_ms": 10.007,
+  "tensorrt_fp16": {
+    "internal": [858, 482],
+    "mean_ms": 5.355,
+    "engine_bytes": 2451860,
+    "transfers": "disabled_cli_default",
+    "note": "GPU compute time from tensorrt_rtx.exe. H2D/D2H were 0 ms (data transfers disabled)."
+  }
+}

@@ -67,9 +67,21 @@ def bench_ckpt(
     else:
         report = _bench_eager(ckpt, size, warmup, iters, scaling_ratio, every_n)
     if try_trt:
-        from nr86.engine_trt import tensorrt_fp16_status
+        from nr86.engine_trt import bench_fp16, tensorrt_fp16_status
 
-        report["tensorrt_fp16"] = tensorrt_fp16_status()
+        status = tensorrt_fp16_status()
+        if status.get("available"):
+            w_s, h_s = size.lower().split("x")
+            iw, ih = internal_size(
+                Placement(
+                    output_w=int(w_s),
+                    output_h=int(h_s),
+                    scaling_ratio=scaling_ratio,
+                )
+            )
+            report["tensorrt_fp16"] = bench_fp16(ckpt, height=ih, width=iw)
+        else:
+            report["tensorrt_fp16"] = status
     print(json.dumps(report, indent=2))
     return report
 

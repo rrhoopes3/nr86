@@ -6,6 +6,7 @@ strongly typed network, serialize engine, JIT on first execute.
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -85,3 +86,68 @@ def _build_with_python(onnx_path: Path, engine_path: Path) -> Path:
     engine_path.write_bytes(bytes(serialized))
     print(f"wrote {engine_path}  bytes={engine_path.stat().st_size}")
     return engine_path
+
+
+def bench_fp16(ckpt: Path, height: int, width: int, iters: int = 50) -> dict:
+    """Export ONNX, build a TRT-RTX engine, time it with the official CLI."""
+    from nr86.export_onnx import export_onnx
+
+    status = tensorrt_fp16_status()
+    if not status.get("available"):
+        return status
+    out_dir = Path("engines")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    onnx_path = out_dir / f"student_{width}x{height}.onnx"
+    engine_path = out_dir / f"student_{width}x{height}.engine"
+    export_onnx(ckpt, onnx_path, height, width)
+    build_engine(onnx_path, engine_path)
+    cli = status.get("cli") or shutil.which("tensorrt_rtx") or shutil.which("tensorrt_rtx.exe")
+    if not cli:
+        status["note"] = "Engine built via Python; tensorrt_rtx.exe missing so no CLI timing."
+        status["engine"] = str(engine_path)
+        status["engine_bytes"] = engine_path.stat().st_size
+        return status
+    cmd = [
+        cli,
+        f"--loadEngine={engine_path}",
+        f"--iterations={iters}",
+        "--warmUp=200",
+        "--duration=1",
+    ]
+    print(" ".join(str(c) for c in cmd))
+    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    text = (proc.stdout or "") + "\n" + (proc.stderr or "")
+    print(text)
+    mean_ms = _parse_trt_mean_ms(text)
+    return {
+        "available": True,
+        "cli": cli,
+        "python_module": status.get("python_module"),
+        "python_version": status.get("python_version"),
+        "precision": "fp16",
+        "onnx": str(onnx_path),
+        "engine": str(engine_path),
+        "engine_bytes": engine_path.stat().st_size,
+        "height": height,
+        "width": width,
+        "mean_ms": mean_ms,
+        "returncode": proc.returncode,
+        "note": (
+            f"TensorRT-RTX CLI timed {width}x{height} FP16 engine."
+            if mean_ms is not None
+            else "Engine built; could not parse a millisecond number from CLI output."
+        ),
+    }
+
+
+def _parse_trt_mean_ms(text: str) -> float | None:
+    for pat in (
+        r"GPU Compute Time.*?mean\s*=\s*([0-9.]+)\s*ms",
+        r"Latency.*?mean\s*=\s*([0-9.]+)\s*ms",
+        r"mean:\s*([0-9.]+)\s*ms",
+        r"Average over \d+ iterations: ([0-9.]+) ms",
+    ):
+        m = re.search(pat, text, flags=re.IGNORECASE | re.DOTALL)
+        if m:
+            return round(float(m.group(1)), 3)
+    return None
