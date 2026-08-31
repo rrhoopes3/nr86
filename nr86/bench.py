@@ -7,7 +7,13 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from nr86.config import INPUT_CHANNELS, Placement
+from nr86.config import (
+    BUDGET_SKIP_DIRTY_MEAN_MS,
+    BUDGET_STUDENT_P95_MS,
+    INPUT_CHANNELS,
+    PRODUCT_INTERNAL_WH,
+    Placement,
+)
 from nr86.models.student import count_params, load_student
 from nr86.placement import internal_size
 from nr86.tiles import iter_tiles, pad_to_tile, stitch
@@ -55,6 +61,7 @@ def bench_ckpt(
     try_trt: bool = False,
     use_trt: bool = False,
     engine: Path | None = None,
+    int8: bool = False,
 ) -> dict:
     if data is not None:
         report = bench_sequence(
@@ -67,6 +74,7 @@ def bench_ckpt(
             max_frames=max_frames,
             use_trt=use_trt,
             engine=engine,
+            int8=int8,
         )
     else:
         report = _bench_eager(ckpt, size, warmup, iters, scaling_ratio, every_n)
@@ -158,10 +166,25 @@ def _bench_eager(
         "fullframe_min_ms": round(full_times[0], 3),
         "vram_mb": vram,
         "note": (
-            "Eager PyTorch: every tile, every iter. every_n is recorded only. "
-            "Not a compute-saving measurement. Use --data for skip / dirty-tile ms. "
-            "TRT-RTX numbers replace this once the SDK is installed."
+            "Eager PyTorch: every tile, every iter. --size is OUTPUT resolution; "
+            "internal = output * scaling. Do not treat fullframe_mean_ms at "
+            "858x482 as a 720p budget. Use --data for skip / dirty-tile ms on "
+            "the product tensor (1280x720)."
         ),
+    }
+
+
+def _path_summary(times: list[float]) -> dict | None:
+    if not times:
+        return None
+    s = sorted(times)
+    n = len(s)
+    return {
+        "n": n,
+        "mean_ms": round(sum(s) / n, 3),
+        "p95_ms": round(s[min(n - 1, int(0.95 * (n - 1)))], 3),
+        "max_ms": round(s[-1], 3),
+        "min_ms": round(s[0], 3),
     }
 
 
@@ -176,10 +199,11 @@ def bench_sequence(
     max_frames: int = 32,
     use_trt: bool = False,
     engine: Path | None = None,
+    int8: bool = False,
 ) -> dict:
-    """Time the path that actually skips frames and dirty tiles."""
+    """Time skip/dirty with prev on device. D2H is off. Color/mvec H2D stays on."""
     from nr86.dataset import FrameDataset, load_frame, pack_input
-    from nr86.runtime import run_frame
+    from nr86.runtime import FrameRunner
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     ds = FrameDataset(data, require_teacher=False)
@@ -194,48 +218,99 @@ def bench_sequence(
         from nr86.trt_student import load_trt_student
 
         h, w = frames[0].color.shape[:2]
-        engine_path = engine or ensure_engine(ckpt, h, w)
+        engine_path = engine or ensure_engine(
+            ckpt, h, w, int8=int8, calib_data=data if int8 else None
+        )
         model = load_trt_student(engine_path, ckpt)
-        backend = "tensorrt_rtx"
+        backend = "tensorrt_rtx_int8" if int8 else "tensorrt_rtx"
     else:
         model = load_student(ckpt, map_location=device).to(device).eval()
     spec = model.spec
-    params = count_params(load_student(ckpt, map_location="cpu")) if backend == "tensorrt_rtx" else count_params(model)
-    packed = [
-        torch.from_numpy(pack_input(fr)).unsqueeze(0).to(device) for fr in frames
-    ]
+    params = (
+        count_params(load_student(ckpt, map_location="cpu"))
+        if backend.startswith("tensorrt_rtx")
+        else count_params(model)
+    )
+    packed = [torch.from_numpy(pack_input(fr)).unsqueeze(0).to(device) for fr in frames]
+    fh, fw = frames[0].color.shape[:2]
+    runner = FrameRunner(
+        model,
+        every_n=every_n,
+        tile=spec.tile,
+        overlap=spec.overlap,
+        dirty_tiles=dirty_tiles,
+    )
 
-    def run_pass() -> tuple[int, int, list[float]]:
-        prev_rgb = None
-        prev_out = None
+    def run_pass(record: bool) -> tuple[int, int, list[float], dict[str, list[float]], list[float]]:
+        runner.reset()
         exec_tiles = 0
         total_tiles = 0
         fills: list[float] = []
+        by_path: dict[str, list[float]] = {}
+        all_ms: list[float] = []
         for i, (fr, x) in enumerate(zip(frames, packed)):
-            pred, stats = run_frame(
-                model,
-                x,
-                color=fr.color,
-                mvec=fr.mvec,
-                prev_color=prev_rgb,
-                prev_out=prev_out,
-                frame_index=i,
-                every_n=every_n,
-                tile=spec.tile,
-                overlap=spec.overlap,
-                dirty_tiles=dirty_tiles,
-            )
+            if device.type == "cuda" and record:
+                start_ev = torch.cuda.Event(enable_timing=True)
+                end_ev = torch.cuda.Event(enable_timing=True)
+                start_ev.record()
+                _pred, stats = runner.run(
+                    x, color=fr.color, mvec=fr.mvec, frame_index=i, to_numpy=False
+                )
+                end_ev.record()
+                end_ev.synchronize()
+                ms = float(start_ev.elapsed_time(end_ev))
+                all_ms.append(ms)
+                by_path.setdefault(stats.path, []).append(ms)
+            else:
+                _pred, stats = runner.run(
+                    x, color=fr.color, mvec=fr.mvec, frame_index=i, to_numpy=False
+                )
             exec_tiles += stats.tiles_executed
             total_tiles += stats.tiles_total
             fills.append(stats.mask_fill)
-            prev_rgb = fr.color
-            prev_out = pred
-        return exec_tiles, total_tiles, fills
+        return exec_tiles, total_tiles, fills, by_path, all_ms
 
-    last = run_pass()
-    times = _time_fn(lambda: run_pass(), iters, warmup, device)
-    exec_tiles, total_tiles, fills = last
-    seq_mean = sum(times) / len(times)
+    for _ in range(warmup):
+        run_pass(record=False)
+    _sync(device)
+
+    combined: dict[str, list[float]] = {}
+    all_frames: list[float] = []
+    last_exec = last_total = 0
+    last_fills: list[float] = []
+    for _ in range(iters):
+        exec_tiles, total_tiles, fills, by_path, all_ms = run_pass(record=True)
+        last_exec, last_total, last_fills = exec_tiles, total_tiles, fills
+        all_frames.extend(all_ms)
+        for path, vals in by_path.items():
+            combined.setdefault(path, []).extend(vals)
+
+    path_ms = {k: _path_summary(v) for k, v in sorted(combined.items())}
+    overall = _path_summary(all_frames)
+    student_times: list[float] = []
+    for key in ("fullframe", "fullframe_dirty"):
+        student_times.extend(combined.get(key) or [])
+    student = _path_summary(student_times)
+    mean_ms = overall["mean_ms"] if overall else None
+    student_p95 = student["p95_ms"] if student else None
+    mean_applies = every_n > 1 and dirty_tiles
+    mean_pass = (
+        mean_ms is not None and mean_ms <= BUDGET_SKIP_DIRTY_MEAN_MS if mean_applies else None
+    )
+    worst_pass = True if student is None else student_p95 <= BUDGET_STUDENT_P95_MS
+    gate_bits = []
+    if mean_applies:
+        gate_bits.append(
+            f"skip+dirty mean {mean_ms} vs {BUDGET_SKIP_DIRTY_MEAN_MS} "
+            f"{'pass' if mean_pass else 'fail'}"
+        )
+    if student is not None:
+        gate_bits.append(
+            f"student-path p95 {student_p95} vs {BUDGET_STUDENT_P95_MS} "
+            f"{'pass' if worst_pass else 'fail'}"
+        )
+    mean_ok = (not mean_applies) or bool(mean_pass)
+    latency_gate = "pass" if mean_ok and worst_pass else "fail: " + "; ".join(gate_bits)
     vram = None
     if device.type == "cuda":
         vram = round(torch.cuda.max_memory_allocated() / (1024**2), 1)
@@ -249,26 +324,37 @@ def bench_sequence(
         "engine": str(engine_path) if engine_path else None,
         "params": params,
         "device": str(device),
+        "product_internal_wh": list(PRODUCT_INTERNAL_WH),
+        "frame_wh": [fw, fh],
         "frames": n,
         "every_n": every_n,
         "dirty_tiles": dirty_tiles,
         "tile": spec.tile,
-        "tiles_executed": exec_tiles,
-        "tiles_total": total_tiles,
-        "tiles_executed_mean": round(exec_tiles / max(n, 1), 3),
-        "executed_frac": round(exec_tiles / max(total_tiles, 1), 4),
-        "mask_fill_mean": round(float(np.mean(fills)), 3) if fills else None,
+        "tiles_executed": last_exec,
+        "tiles_total": last_total,
+        "tiles_executed_mean": round(last_exec / max(n, 1), 3),
+        "executed_frac": round(last_exec / max(last_total, 1), 4),
+        "mask_fill_mean": round(float(np.mean(last_fills)), 3) if last_fills else None,
         "warmup": warmup,
         "iters": iters,
-        "sequence_mean_ms": round(seq_mean, 3),
-        "mean_ms": round(seq_mean / max(n, 1), 3),
-        "p95_ms": round(times[int(0.95 * (len(times) - 1))] / max(n, 1), 3),
-        "min_ms": round(times[0] / max(n, 1), 3),
+        "mean_ms": mean_ms,
+        "p95_ms": overall["p95_ms"] if overall else None,
+        "min_ms": overall["min_ms"] if overall else None,
+        "path_ms": path_ms,
+        "student_path_ms": student,
+        "budget": {
+            "skip_dirty_mean_ms": BUDGET_SKIP_DIRTY_MEAN_MS,
+            "student_p95_ms": BUDGET_STUDENT_P95_MS,
+            "mean_applies": mean_applies,
+            "mean_pass": mean_pass,
+            "student_p95_pass": worst_pass,
+            "latency_gate": latency_gate,
+        },
         "vram_mb": vram,
         "note": (
-            f"{backend} student with actual skip-frame and dirty-tile execution. "
-            "mean_ms is per frame from CUDA events around run_frame. "
-            "packed inputs are already on GPU; run_frame still copies color/mvec "
-            "from numpy and D2Hs the RGB out. Not tensorrt_rtx.exe with transfers off."
+            f"{backend} FrameRunner: prev_color/prev_out stay on GPU. "
+            "Color/mvec H2D via pinned host buffers each frame (honest numpy harness). "
+            "No D2H of RGB. Mean is all frames; student-path p95 is fullframe + "
+            "fullframe_dirty (the stutter spike). 10.7 ms eager-858x482 is retired."
         ),
     }

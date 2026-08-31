@@ -44,6 +44,9 @@ class StudentSpec:
 
 PRESETS: dict[str, StudentSpec] = {
     "smoke": StudentSpec(name="smoke", base=16, levels=3, tile=128, overlap=16, norm="gn"),
+    "smoke_int8": StudentSpec(
+        name="smoke_int8", base=16, levels=3, tile=128, overlap=16, norm="none"
+    ),
     "ampere": StudentSpec(name="ampere", base=32, levels=4, tile=256, overlap=16, norm="gn"),
     "ampere_int8": StudentSpec(
         name="ampere_int8", base=32, levels=4, tile=256, overlap=16, norm="none"
@@ -61,3 +64,16 @@ class Placement:
     overlap: int = 16
     output_w: int = 1920
     output_h: int = 1080
+
+
+# Product tensor: Quality-input for 1080p output. Taught dumps are 1280x720.
+# Do not judge 720p TRT against eager PyTorch at 858x482 (that number was
+# `bench --size 1280x720` applying scaling 0.67 a second time).
+PRODUCT_OUTPUT_WH = (1920, 1080)
+PRODUCT_INTERNAL_WH = (1280, 720)
+# Absolute leftover at 60 Hz / 120 Hz — not "beat a historical PyTorch line".
+# skip+dirty mean must fit in a 120 Hz frame. Student-path p95 must not
+# exceed a 60 Hz frame (an 11 ms spike every dirty frame is a stutter).
+BUDGET_SKIP_DIRTY_MEAN_MS = round(1000.0 / 120.0, 3)  # 8.333
+BUDGET_STUDENT_P95_MS = round(1000.0 / 60.0, 3)  # 16.667
+

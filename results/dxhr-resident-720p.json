@@ -1,0 +1,39 @@
+{
+  "ckpt": "runs/dxhr-depth-smoke/student.pt",
+  "engine": "engines/student_1280x720_066e098e4d.engine",
+  "data": "datasets/q720-dxhr-room2",
+  "product_internal_wh": [1280, 720],
+  "copies": "pinned H2D of color/mvec each frame; prev_color/prev_out resident; no D2H of RGB",
+  "eval": {
+    "fullframe_delta_psnr": 1.546,
+    "skip_dirty_delta_psnr": 1.143,
+    "gate": "pass"
+  },
+  "trt_skip_dirty": {
+    "mean_ms": 12.789,
+    "p95_ms": 17.579,
+    "path_ms": {
+      "fullframe": {"n": 128, "mean_ms": 16.561, "p95_ms": 17.665},
+      "fullframe_dirty": {"n": 56, "mean_ms": 16.537, "p95_ms": 17.571},
+      "warp_clean": {"n": 72, "mean_ms": 3.168, "p95_ms": 4.165}
+    },
+    "student_path_p95_ms": 17.65,
+    "mask_fill_mean": 0.137,
+    "executed_frac": 0.7188
+  },
+  "trt_every_n_1": {
+    "mean_ms": 16.543,
+    "student_path_p95_ms": 17.578
+  },
+  "pytorch_skip_dirty": {
+    "mean_ms": 18.42,
+    "student_path_p95_ms": 29.596
+  },
+  "budget": {
+    "skip_dirty_mean_ms": 8.333,
+    "student_p95_ms": 16.667,
+    "latency_gate": "fail: skip+dirty mean 12.789 vs 8.333; student-path p95 17.65 vs 16.667"
+  },
+  "lesson": "Copy tax is mostly gone (full-frame 21.4 → 16.5 ms). Remaining cost is the student (~11.4 ms) plus warp/mask/H2D (~5 ms). warp_clean is 3.2 ms. Quiet-lobby fill 0.137 still runs the student on ~72% of tiles, so the skip+dirty mean cannot reach 8.33 ms while student-path p95 sits at 17.7. Next lever is cut pixels, then INT8 — not a bigger net. Combat dump will make skip worse, not better.",
+  "do_not": ["ampere400", "int8_qdq", "grow_width"]
+}

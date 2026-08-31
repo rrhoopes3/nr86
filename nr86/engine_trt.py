@@ -89,24 +89,37 @@ def _build_with_python(onnx_path: Path, engine_path: Path) -> Path:
     return engine_path
 
 
-def engine_path_for(ckpt: Path, height: int, width: int) -> Path:
+def engine_path_for(
+    ckpt: Path,
+    height: int,
+    width: int,
+    precision: str = "fp16",
+) -> Path:
     """Engine filename includes a ckpt digest so stale HxW files are not reused."""
     digest = hashlib.sha1(Path(ckpt).read_bytes()).hexdigest()[:10]
-    return Path("engines") / f"student_{width}x{height}_{digest}.engine"
+    tag = "" if precision == "fp16" else f"_{precision}"
+    return Path("engines") / f"student_{width}x{height}_{digest}{tag}.engine"
 
 
-def ensure_engine(ckpt: Path, height: int, width: int) -> Path:
+def ensure_engine(
+    ckpt: Path,
+    height: int,
+    width: int,
+    int8: bool = False,
+    calib_data: Path | None = None,
+) -> Path:
     """Export ONNX and build a TRT-RTX engine for this ckpt + HxW if missing."""
     from nr86.export_onnx import export_onnx
 
     ckpt = Path(ckpt)
     out_dir = Path("engines")
     out_dir.mkdir(parents=True, exist_ok=True)
-    engine_path = engine_path_for(ckpt, height, width)
+    precision = "int8" if int8 else "fp16"
+    engine_path = engine_path_for(ckpt, height, width, precision=precision)
     if engine_path.exists() and engine_path.stat().st_size > 0:
         return engine_path
     onnx_path = engine_path.with_suffix(".onnx")
-    export_onnx(ckpt, onnx_path, height, width)
+    export_onnx(ckpt, onnx_path, height, width, int8=int8, calib_data=calib_data)
     return build_engine(onnx_path, engine_path)
 
 

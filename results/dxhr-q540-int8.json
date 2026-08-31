@@ -1,0 +1,34 @@
+{
+  "internal_wh": [960, 540],
+  "note": "First real QDQ path. TensorRT-RTX 1.6 has no --int8 flag; engines come from QuantizeLinear in ONNX. GroupNorm is still on the graph that works.",
+  "smoke_int8_no_gn": {
+    "init": "transplant conv weights from q540 student_best",
+    "copied": 14,
+    "skipped": 12,
+    "init_holdout_delta_psnr": -4.571,
+    "train_400_holdout_delta_psnr": -0.364,
+    "train_400_room2_full_delta_psnr": -0.182,
+    "train_400_room2_skip_delta_psnr": -0.285,
+    "gate": "fail",
+    "lesson": "Dropping GN is not a free INT8 prep. Transplant is unusable; 400 steps still lose to identity."
+  },
+  "qdq_on_gn_smoke": {
+    "ckpt": "runs/dxhr-depth-smoke-q540/student_best.pt",
+    "engine": "engines/student_960x540_1ae115ab73_int8.engine",
+    "happy_path": false,
+    "holdout_full_delta_psnr": 0.22,
+    "room2_skip_delta_psnr": 0.239,
+    "fp16_holdout_delta_psnr": 0.421,
+    "fp16_room2_skip_delta_psnr": 1.224,
+    "trt_skip_dirty_mean_ms": 6.595,
+    "trt_student_p95_ms": 9.06,
+    "fp16_skip_dirty_mean_ms": 5.034,
+    "fp16_student_p95_ms": 7.642,
+    "cli_compute_mean_ms": 6.363,
+    "cli_transfers": "off",
+    "latency_gate": "pass",
+    "quality_gate": "fail",
+    "lesson": "TRT-RTX will build a QDQ engine on the GN smoke graph. It is slower than FP16 (6.60 vs 5.03 ms mean) and drops below +0.25 dB. INT8 is not a win until a no-GN student holds quality."
+  },
+  "do_not": ["ampere400", "grow_width", "shrink_below_960x540"]
+}

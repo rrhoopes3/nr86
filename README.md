@@ -20,9 +20,10 @@ INT8 / INT4 / 2:4 sparsity are **roadmap**, not implementation.
 | PSNR/SSIM eval vs teacher **and** identity | working (`nr86 eval`, `--use-trt`, `--offset`) |
 | Residual-after-warp mask; skip-frame + dirty-tile runtime | working — measured tiles + ms |
 | Placement: average **and** worst-case | **cost model**, not measured |
-| Residual UNet (`gn` FP16 / `none` reserved for later INT8) | working — smoke only |
+| Residual UNet (`gn` FP16 / `smoke_int8` is same width, `norm=none`) | working — smoke only |
 | TensorRT-RTX FP16 student in `run_frame` | working on this 3090 |
-| INT8 QDQ / INT4 / 2:4 / RTXNS | **not implemented** |
+| INT8 QDQ export + hashed TRT engine | working — not a win yet (see `results/dxhr-q540-int8.json`) |
+| INT4 / 2:4 / RTXNS | **not implemented** |
 
 Pulled in as git submodules / vendored headers (open or official only):
 
@@ -46,9 +47,11 @@ that did not hold out (−2.16 dB) once Generic Depth was a real buffer.
 Smoke trained on a depth dump, last-32 hold-out **+0.50 dB** at 3200 steps.
 A later Sarif HQ lobby burst (unseen room) **+1.55 dB** full-frame /
 **+1.14 dB** skip+dirty. Zeroing depth on that room is **−3.96 dB**.
-720p TRT `run_frame` skip+dirty **14.3 ms** (copies on) vs PyTorch 24.8 ms.
-Student-only TRT **11.4 ms**. None of those are under the ~10.7 ms line
-(that line was eager PyTorch at 858×482).
+720p TRT student-only **11.4 ms**. After GPU-resident `FrameRunner`
+(pinned color/mvec H2D, prev on device, no RGB D2H): skip+dirty **mean
+12.8 ms**, student-path **p95 17.7 ms**, warp_clean **3.2 ms**. Gate is
+skip+dirty mean ≤ 8.33 ms **and** student-path p95 ≤ 16.67 ms on 1280×720.
+Both fail. The 10.7 ms line (eager 858×482) is retired.
 
 ## Quick start (this machine: 3090, 24 GB, sm_86)
 
@@ -69,7 +72,8 @@ python -m nr86 place --preset ampere --size 1920x1080
 
 `eval` must beat identity. `place` is a pixel-ops model (~13× average vs
 ~2.2× worst-case). That ratio is **not** a measured millisecond saving.
-`bench --data` reports `tiles_executed` and CUDA-event `mean_ms`.
+`bench --data` reports per-path `mean_ms` / `p95_ms` and the two-sided
+latency gate on 1280×720.
 
 ## Why the 30-series tweak is not the product
 
@@ -83,7 +87,10 @@ python -m nr86 place --preset ampere --size 1920x1080
 24 GB VRAM is the one thing that does not suck: a 148M teacher plus
 activations fits. Distilling a 20–40M student on one 3090 is a week, not a
 cluster. The smoke preset is minutes. **Do not grow width.** Held-out DXHR
-clears +0.25 dB; 720p `run_frame` TRT does not yet beat ~10.7 ms.
+clears +0.25 dB. Latency is judged on the **1280×720** product tensor:
+skip+dirty **mean** under 8.33 ms (120 Hz frame) **and** student-path
+**p95** under 16.67 ms (60 Hz frame). The old 10.7 ms line was eager
+PyTorch at 858×482 — retired.
 
 ## Repo layout
 
@@ -97,9 +104,9 @@ docs/                 architecture + measurement protocol
 
 ## Next
 
-Keep smoke. Cut the Python `run_frame` HWC round-trip so 720p TRT can
-approach the student-only 11.4 ms. INT8 / Ampere / width growth stay off
-until a 720p `run_frame` mean (copies on) is under the ~10.7 ms line.
-Another quiet lobby F9 will not teach much; harder motion would.
+Keep smoke. The copy tax is mostly gone. 720p FP16 student-path p95 is
+17.7 ms and skip+dirty mean is 12.8 ms — both miss. Next lever is **cut
+pixels**, then INT8, then a shallower net. A combat / fast-turn dump is
+the quality *and* perf scare (quiet-lobby fill 0.137 flatters skip).
 
 Do not put this on multiplayer.

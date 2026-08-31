@@ -1,0 +1,48 @@
+{
+  "internal_wh": [960, 540],
+  "pixels_vs_720p": 0.5625,
+  "ckpt": "runs/dxhr-depth-smoke/student.pt",
+  "engine": "engines/student_960x540_066e098e4d.engine",
+  "note": "Zero-shot: 720p 3200-step smoke, fully conv, taught dumps at 960x540. No retrain yet. Do not shrink further — room2 skip missed +0.25.",
+  "quality": {
+    "holdout_last32_full": {
+      "identity_psnr": 25.568,
+      "delta_psnr": 0.18,
+      "gate": "fail"
+    },
+    "room2_first32_full": {
+      "identity_psnr": 31.515,
+      "delta_psnr": 0.446,
+      "gate": "pass"
+    },
+    "room2_first32_skip_dirty": {
+      "identity_psnr": 31.515,
+      "delta_psnr": 0.226,
+      "gate": "fail"
+    }
+  },
+  "trt_skip_dirty": {
+    "data": "datasets/q540-dxhr-room2",
+    "mean_ms": 6.524,
+    "p95_ms": 9.017,
+    "path_ms": {
+      "fullframe": {"n": 128, "mean_ms": 8.32, "p95_ms": 9.124},
+      "fullframe_dirty": {"n": 56, "mean_ms": 8.26, "p95_ms": 9.185},
+      "warp_clean": {"n": 72, "mean_ms": 1.98, "p95_ms": 2.542}
+    },
+    "student_path_p95_ms": 9.156,
+    "mask_fill_mean": 0.135,
+    "executed_frac": 0.7188,
+    "cli_compute_mean_ms": 6.106,
+    "cli_transfers": "off"
+  },
+  "budget": {
+    "skip_dirty_mean_ms": 8.333,
+    "student_p95_ms": 16.667,
+    "mean_pass": true,
+    "student_p95_pass": true,
+    "latency_gate": "pass"
+  },
+  "lesson": "Cutting to 960x540 (56% of 720p pixels) clears both latency sides with the same 193k smoke graph. Quality does not hold: hold-out last32 +0.18 and lobby skip+dirty +0.226 vs +0.25. Next is retrain smoke at this size from the 720p peak, not 858x482 and not INT8.",
+  "do_not": ["ampere400", "int8_qdq", "grow_width", "shrink_below_960x540"]
+}

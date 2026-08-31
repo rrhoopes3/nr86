@@ -1,7 +1,7 @@
 """TensorRT-RTX student with the same forward() as ResidualUNet.
 
-This is the thing that can beat 10 ms PyTorch full-frame. run_frame already
-calls model(packed); swap the module, keep the skip/mask control flow.
+This is the thing that can beat a 60 Hz leftover budget. `FrameRunner`
+already calls model(packed); swap the module, keep the skip/mask control flow.
 """
 
 from __future__ import annotations

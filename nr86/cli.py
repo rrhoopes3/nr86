@@ -39,6 +39,7 @@ def main(argv: list[str] | None = None) -> int:
     p_t.add_argument("--lr", type=float, default=2e-4)
     p_t.add_argument("--resume", type=Path, default=None)
     p_t.add_argument("--skip-eval", action="store_true")
+    p_t.add_argument("--data-frames", type=int, default=None, help="Train on the first N frames only")
 
     p_ev = sub.add_parser("eval", help="PSNR/SSIM vs teacher and vs identity")
     p_ev.add_argument("--ckpt", type=Path, required=True)
@@ -55,12 +56,15 @@ def main(argv: list[str] | None = None) -> int:
     p_ev.add_argument("--use-trt", action="store_true")
     p_ev.add_argument("--engine", type=Path, default=None)
     p_ev.add_argument("--offset", type=int, default=0, help="Skip this many frames (hold-out start)")
+    p_ev.add_argument("--int8", action="store_true", help="Build/use a QDQ INT8 TensorRT engine")
 
     p_e = sub.add_parser("export", help="Export student ONNX")
     p_e.add_argument("--ckpt", type=Path, required=True)
     p_e.add_argument("--onnx", type=Path, required=True)
     p_e.add_argument("--height", type=int, default=256)
     p_e.add_argument("--width", type=int, default=256)
+    p_e.add_argument("--int8", action="store_true", help="Insert QDQ from calibration ranges")
+    p_e.add_argument("--data", type=Path, default=None, help="Dump used to calibrate INT8 scales")
 
     p_q = sub.add_parser("calibrate", help="PTQ min/max on our student")
     p_q.add_argument("--ckpt", type=Path, required=True)
@@ -80,6 +84,7 @@ def main(argv: list[str] | None = None) -> int:
     p_b.add_argument("--try-trt", action="store_true", help="Report TensorRT-RTX FP16 availability")
     p_b.add_argument("--use-trt", action="store_true", help="Run the student as a TensorRT-RTX engine")
     p_b.add_argument("--engine", type=Path, default=None)
+    p_b.add_argument("--int8", action="store_true", help="Build/use a QDQ INT8 TensorRT engine")
 
     p_p = sub.add_parser("place", help="Pixel-ops cost (average and worst-case)")
     p_p.add_argument("--preset", choices=sorted(PRESETS), default="ampere")
@@ -159,6 +164,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             args.lr,
             resume=args.resume,
             skip_eval=args.skip_eval,
+            data_frames=args.data_frames,
         )
         return 0
     if args.cmd == "eval":
@@ -174,12 +180,20 @@ def _dispatch(args: argparse.Namespace) -> int:
             use_trt=args.use_trt,
             engine=args.engine,
             offset=args.offset,
+            int8=args.int8,
         )
         return 0
     if args.cmd == "export":
         from nr86.export_onnx import export_onnx
 
-        export_onnx(args.ckpt, args.onnx, args.height, args.width)
+        export_onnx(
+            args.ckpt,
+            args.onnx,
+            args.height,
+            args.width,
+            int8=args.int8,
+            calib_data=args.data,
+        )
         return 0
     if args.cmd == "calibrate":
         from nr86.quantize import calibrate
@@ -202,6 +216,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             try_trt=args.try_trt,
             use_trt=args.use_trt,
             engine=args.engine,
+            int8=args.int8,
         )
         return 0
     if args.cmd == "place":

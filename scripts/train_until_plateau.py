@@ -5,6 +5,7 @@ Keeps the smoke preset. Does not grow width, switch to ampere400, or INT8.
 
 from __future__ import annotations
 
+import argparse
 import json
 import shutil
 from pathlib import Path
@@ -13,9 +14,9 @@ from nr86.eval import evaluate
 from nr86.train import train
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "datasets" / "q720-dxhr-holdout"
-OUT = ROOT / "runs" / "dxhr-depth-smoke"
-RESULT = ROOT / "results" / "dxhr-depth-plateau.json"
+DEFAULT_DATA = ROOT / "datasets" / "q720-dxhr-holdout"
+DEFAULT_OUT = ROOT / "runs" / "dxhr-depth-smoke"
+DEFAULT_RESULT = ROOT / "results" / "dxhr-depth-plateau.json"
 
 CHUNK = 200
 MAX_STEPS = 8000
@@ -37,23 +38,54 @@ def _brief(ev: dict) -> dict:
     }
 
 
+def _parse() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--data", type=Path, default=DEFAULT_DATA)
+    p.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    p.add_argument("--result", type=Path, default=DEFAULT_RESULT)
+    p.add_argument(
+        "--init",
+        type=Path,
+        default=None,
+        help="Starting checkpoint when --out has no student.pt (does not resume old history).",
+    )
+    p.add_argument("--train-frames", type=int, default=TRAIN_FRAMES)
+    p.add_argument("--eval-offset", type=int, default=EVAL_OFFSET)
+    p.add_argument("--eval-frames", type=int, default=EVAL_FRAMES)
+    p.add_argument("--chunk", type=int, default=CHUNK)
+    p.add_argument("--max-steps", type=int, default=MAX_STEPS)
+    p.add_argument("--preset", default="smoke")
+    return p.parse_args()
+
+
 def main() -> None:
-    if not DATA.exists():
-        raise SystemExit(f"missing taught dump {DATA}")
-    OUT.mkdir(parents=True, exist_ok=True)
-    RESULT.parent.mkdir(parents=True, exist_ok=True)
+    args = _parse()
+    data = args.data
+    out = args.out
+    result = args.result
+    train_frames = args.train_frames
+    eval_offset = args.eval_offset
+    eval_frames = args.eval_frames
+    chunk = args.chunk
+    max_steps = args.max_steps
+    preset = args.preset
+
+    if not data.exists():
+        raise SystemExit(f"missing taught dump {data}")
+    out.mkdir(parents=True, exist_ok=True)
+    result.parent.mkdir(parents=True, exist_ok=True)
 
     history: list[dict] = []
     best_delta = float("-inf")
     stale = 0
     total = 0
     resume: Path | None = None
-    best_ckpt = OUT / "student_best.pt"
+    best_ckpt = out / "student_best.pt"
     stop_reason = "max_steps"
-    ckpt = OUT / "student.pt"
-    if RESULT.exists():
+    ckpt = out / "student.pt"
+    if result.exists():
         try:
-            prev = json.loads(RESULT.read_text(encoding="utf-8"))
+            prev = json.loads(result.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             prev = {}
         if prev.get("history"):
@@ -70,44 +102,47 @@ def main() -> None:
             print(f"resuming loop at {total} steps  best={best_delta:+.3f}", flush=True)
     if resume is None and ckpt.exists() and not history:
         resume = ckpt
-        total = 200
-        print(f"resuming weights {ckpt} as 200-step start", flush=True)
+        total = 0
+        print(f"resuming weights {ckpt} as start (history empty)", flush=True)
+    if resume is None and args.init is not None and Path(args.init).exists():
+        resume = Path(args.init)
+        print(f"init from {resume}", flush=True)
 
-    while total < MAX_STEPS:
-        seed = total // CHUNK
+    while total < max_steps:
+        seed = total // chunk
         print(f"\n=== chunk {seed + 1}  resume={resume}  seed={seed} ===", flush=True)
         train(
-            DATA,
-            OUT,
-            preset="smoke",
-            steps=CHUNK,
+            data,
+            out,
+            preset=preset,
+            steps=chunk,
             resume=resume,
             skip_eval=True,
             seed=seed,
-            data_frames=TRAIN_FRAMES,
+            data_frames=train_frames,
         )
-        total += CHUNK
-        ckpt = OUT / "student.pt"
+        total += chunk
+        ckpt = out / "student.pt"
         resume = ckpt
 
-        hold_full = evaluate(ckpt, DATA, max_frames=EVAL_FRAMES, offset=EVAL_OFFSET, every_n=1)
+        hold_full = evaluate(ckpt, data, max_frames=eval_frames, offset=eval_offset, every_n=1)
         hold_skip = evaluate(
             ckpt,
-            DATA,
-            max_frames=EVAL_FRAMES,
-            offset=EVAL_OFFSET,
+            data,
+            max_frames=eval_frames,
+            offset=eval_offset,
             every_n=2,
             dirty_tiles=True,
         )
         hold_nodepth = evaluate(
             ckpt,
-            DATA,
-            max_frames=EVAL_FRAMES,
-            offset=EVAL_OFFSET,
+            data,
+            max_frames=eval_frames,
+            offset=eval_offset,
             every_n=1,
             ablate="depth",
         )
-        train_full = evaluate(ckpt, DATA, max_frames=32, offset=0, every_n=1)
+        train_full = evaluate(ckpt, data, max_frames=32, offset=0, every_n=1)
 
         delta = float(hold_full["delta_psnr"])
         row = {
@@ -118,14 +153,16 @@ def main() -> None:
             "train_full": _brief(train_full),
         }
         history.append(row)
-        RESULT.write_text(
+        result.write_text(
             json.dumps(
                 {
-                    "preset": "smoke",
-                    "train_frames": TRAIN_FRAMES,
-                    "eval_offset": EVAL_OFFSET,
-                    "eval_frames": EVAL_FRAMES,
-                    "chunk": CHUNK,
+                    "preset": preset,
+                    "data": str(data),
+                    "out": str(out),
+                    "train_frames": train_frames,
+                    "eval_offset": eval_offset,
+                    "eval_frames": eval_frames,
+                    "chunk": chunk,
                     "min_gain_db": MIN_GAIN,
                     "history": history,
                     "best_delta_psnr": max(best_delta, delta) if best_delta != float("-inf") else delta,
@@ -179,18 +216,20 @@ def main() -> None:
             )
             break
     else:
-        stop_reason = f"max_steps ({MAX_STEPS})"
+        stop_reason = f"max_steps ({max_steps})"
 
-    if best_ckpt.exists() and (OUT / "student.pt").exists():
+    if best_ckpt.exists() and (out / "student.pt").exists():
         # leave student.pt as last weights; student_best.pt is the peak hold-out
         pass
 
     payload = {
-        "preset": "smoke",
-        "train_frames": TRAIN_FRAMES,
-        "eval_offset": EVAL_OFFSET,
-        "eval_frames": EVAL_FRAMES,
-        "chunk": CHUNK,
+        "preset": preset,
+        "data": str(data),
+        "out": str(out),
+        "train_frames": train_frames,
+        "eval_offset": eval_offset,
+        "eval_frames": eval_frames,
+        "chunk": chunk,
         "min_gain_db": MIN_GAIN,
         "total_steps": total,
         "best_delta_psnr": None if best_delta == float("-inf") else round(best_delta, 3),
@@ -199,9 +238,9 @@ def main() -> None:
         "history": history,
         "status": "done",
     }
-    RESULT.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    result.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     print(json.dumps({k: payload[k] for k in payload if k != "history"}, indent=2))
-    print(f"wrote {RESULT}", flush=True)
+    print(f"wrote {result}", flush=True)
 
 
 if __name__ == "__main__":

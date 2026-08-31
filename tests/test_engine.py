@@ -57,3 +57,35 @@ def test_int8_preset_has_no_groupnorm():
     assert not any(isinstance(mod, torch.nn.GroupNorm) for mod in m.modules())
     m2 = build_student("ampere")
     assert any(isinstance(mod, torch.nn.GroupNorm) for mod in m2.modules())
+    smoke_i8 = build_student("smoke_int8")
+    assert not any(isinstance(mod, torch.nn.GroupNorm) for mod in smoke_i8.modules())
+    smoke = build_student("smoke")
+    assert any(isinstance(mod, torch.nn.GroupNorm) for mod in smoke.modules())
+    assert smoke_i8.spec.base == smoke.spec.base
+    assert smoke_i8.spec.levels == smoke.spec.levels
+
+
+def test_transplant_and_qdq_onnx(tmp_path: Path):
+    from nr86.export_onnx import export_onnx
+    from nr86.models.student import save_student
+    from nr86.quantize import prepare_qdq, transplant_to_int8
+    from nr86.synth import write_synth
+
+    gn = build_student("smoke")
+    src = tmp_path / "gn.pt"
+    save_student(gn, src)
+    dst = tmp_path / "i8.pt"
+    info = transplant_to_int8(src, dst, preset="smoke_int8")
+    assert info["copied"] > 0
+    assert info["dst_norm"] == "none"
+
+    data = tmp_path / "ds"
+    write_synth(data, frames=2, size=128, hq_scale=2)
+    onnx = tmp_path / "qdq.onnx"
+    export_onnx(dst, onnx, 128, 128, int8=True, calib_data=data)
+    blob = onnx.read_bytes()
+    assert b"QuantizeLinear" in blob
+    assert b"DequantizeLinear" in blob
+
+    with pytest.raises(ValueError, match="norm="):
+        prepare_qdq(gn, {})

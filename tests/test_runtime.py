@@ -6,7 +6,7 @@ import torch.nn as nn
 
 from nr86.dataset import apply_ablation
 from nr86.reproject import fill_ratio, residual_mask, warp_rgb
-from nr86.runtime import run_frame
+from nr86.runtime import FrameRunner, run_frame
 
 
 class CountingNet(nn.Module):
@@ -182,6 +182,23 @@ def test_hybrid_skip_slot_still_runs_when_dirty():
     assert stats.tiles_executed >= 1
     assert stats.path == "fullframe_dirty"
     assert net.calls == 1
+
+
+def test_frame_runner_holds_prev_on_cpu():
+    net = CountingNet()
+    h = w = 16
+    color = np.full((h, w, 3), 0.4, dtype=np.float32)
+    depth = np.zeros((h, w), dtype=np.float32)
+    mvec = np.zeros((h, w, 2), dtype=np.float32)
+    x = _packed(color, depth, mvec)
+    runner = FrameRunner(net, every_n=2, tile=8, overlap=0, dirty_tiles=True)
+    _pred0, s0 = runner.run(x, color=color, mvec=mvec, frame_index=0)
+    assert s0.path == "fullframe"
+    calls = net.calls
+    _pred1, s1 = runner.run(x, color=color, mvec=mvec, frame_index=1)
+    assert s1.path == "warp_clean"
+    assert s1.ran_student is False
+    assert net.calls == calls
 
 
 def test_ablation_zeros_channels():

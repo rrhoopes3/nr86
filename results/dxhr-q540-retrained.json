@@ -1,0 +1,37 @@
+{
+  "internal_wh": [960, 540],
+  "ckpt": "runs/dxhr-depth-smoke-q540/student_best.pt",
+  "engine": "engines/student_960x540_1ae115ab73.engine",
+  "init": "runs/dxhr-depth-smoke/student.pt",
+  "plateau_steps": 400,
+  "stop_reason": "plateau at 800; peak hold-out at 400",
+  "quality": {
+    "holdout_last32_full": {"delta_psnr": 0.421, "gate": "pass"},
+    "holdout_last32_skip_dirty": {"delta_psnr": 0.402, "gate": "pass"},
+    "holdout_ablate_depth": {"delta_psnr": -0.032, "gate": "fail"},
+    "holdout_train_first32": {"delta_psnr": 1.436, "gate": "pass"},
+    "room2_first32_full": {"identity_psnr": 31.515, "delta_psnr": 1.505, "gate": "pass"},
+    "room2_first32_skip_dirty": {"identity_psnr": 31.515, "delta_psnr": 1.224, "gate": "pass"},
+    "room2_last32_full": {"identity_psnr": 27.297, "delta_psnr": 0.778, "gate": "pass"}
+  },
+  "trt_skip_dirty": {
+    "data": "datasets/q540-dxhr-room2",
+    "mean_ms": 5.034,
+    "p95_ms": 7.452,
+    "student_path_p95_ms": 7.642,
+    "path_ms": {
+      "fullframe": {"mean_ms": 6.38, "p95_ms": 7.513},
+      "fullframe_dirty": {"mean_ms": 6.45, "p95_ms": 7.642},
+      "warp_clean": {"mean_ms": 1.538, "p95_ms": 1.754}
+    },
+    "mask_fill_mean": 0.135,
+    "executed_frac": 0.7188
+  },
+  "budget": {
+    "skip_dirty_mean_ms": 8.333,
+    "student_p95_ms": 16.667,
+    "latency_gate": "pass"
+  },
+  "lesson": "400 more smoke steps at 960x540 recovered quality (hold-out +0.18→+0.42, lobby skip +0.23→+1.22) and kept the latency gate (5.03 / 7.64). Same 193k graph. Depth still matters (ablate −0.03). INT8 on this smoke graph is now eligible. Combat dump is still the scare.",
+  "do_not": ["ampere400", "grow_width", "shrink_below_960x540"]
+}

@@ -1,7 +1,7 @@
 """Quality eval: student vs teacher vs identity (cheap color).
 
 If the student does not beat identity, it is fast at doing nothing.
-Skip-frame and dirty-tile paths go through runtime.run_frame so the
+Skip-frame and dirty-tile paths go through runtime.FrameRunner so the
 network is not executed on frames / tiles that should have been skipped.
 """
 
@@ -17,7 +17,7 @@ import torch
 from nr86.dataset import FrameDataset, apply_ablation, load_frame, pack_input
 from nr86.metrics import psnr, ssim
 from nr86.models.student import load_student
-from nr86.runtime import run_frame
+from nr86.runtime import FrameRunner
 
 
 @torch.no_grad()
@@ -31,6 +31,7 @@ def evaluate(
     use_trt: bool = False,
     engine: Path | None = None,
     offset: int = 0,
+    int8: bool = False,
 ) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     backend = "pytorch"
@@ -43,9 +44,11 @@ def evaluate(
         probe = FrameDataset(data, require_teacher=True)
         fr0 = load_frame(probe.root, probe.rows[min(max(0, int(offset)), len(probe) - 1)])
         h, w = fr0.color.shape[:2]
-        engine_path = engine or ensure_engine(ckpt, h, w)
+        engine_path = engine or ensure_engine(
+            ckpt, h, w, int8=int8, calib_data=data if int8 else None
+        )
         model = load_trt_student(engine_path, ckpt)
-        backend = "tensorrt_rtx"
+        backend = "tensorrt_rtx_int8" if int8 else "tensorrt_rtx"
     else:
         model = load_student(ckpt, map_location=device).to(device).eval()
         engine_path = None
@@ -61,25 +64,24 @@ def evaluate(
     executed: list[int] = []
     totals: list[int] = []
     paths: list[str] = []
-    prev_rgb: np.ndarray | None = None
-    prev_out: np.ndarray | None = None
+    runner = FrameRunner(
+        model,
+        every_n=every_n,
+        tile=spec.tile,
+        overlap=spec.overlap,
+        dirty_tiles=dirty_tiles,
+    )
 
     for i in range(n):
         frame = load_frame(ds.root, ds.rows[start + i])
         packed = apply_ablation(pack_input(frame), ablate)
         x = torch.from_numpy(packed).unsqueeze(0).to(device)
-        pred, stats = run_frame(
-            model,
+        pred, stats = runner.run(
             x,
             color=frame.color,
             mvec=frame.mvec,
-            prev_color=prev_rgb,
-            prev_out=prev_out,
             frame_index=i,
-            every_n=every_n,
-            tile=spec.tile,
-            overlap=spec.overlap,
-            dirty_tiles=dirty_tiles,
+            to_numpy=True,
         )
         teacher = frame.teacher
         assert teacher is not None
@@ -91,8 +93,6 @@ def evaluate(
         st_psnr.append(psnr(pred, teacher))
         id_ssim.append(ssim(frame.color, teacher))
         st_ssim.append(ssim(pred, teacher))
-        prev_rgb = frame.color
-        prev_out = pred
 
     report = {
         "ckpt": str(ckpt),
