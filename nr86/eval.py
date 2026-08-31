@@ -28,9 +28,26 @@ def evaluate(
     every_n: int = 1,
     dirty_tiles: bool = False,
     ablate: str = "none",
+    use_trt: bool = False,
+    engine: Path | None = None,
 ) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = load_student(ckpt, map_location=device).to(device).eval()
+    backend = "pytorch"
+    if use_trt or engine is not None:
+        if device.type != "cuda":
+            raise RuntimeError("TensorRT eval needs CUDA")
+        from nr86.engine_trt import ensure_engine
+        from nr86.trt_student import load_trt_student
+
+        probe = FrameDataset(data, require_teacher=True)
+        fr0 = load_frame(probe.root, probe.rows[0])
+        h, w = fr0.color.shape[:2]
+        engine_path = engine or ensure_engine(ckpt, h, w)
+        model = load_trt_student(engine_path, ckpt)
+        backend = "tensorrt_rtx"
+    else:
+        model = load_student(ckpt, map_location=device).to(device).eval()
+        engine_path = None
     spec = model.spec
     ds = FrameDataset(data, require_teacher=True)
     n = min(len(ds), max_frames)
@@ -82,6 +99,8 @@ def evaluate(
         "every_n": every_n,
         "dirty_tiles": dirty_tiles,
         "ablate": ablate,
+        "backend": backend,
+        "engine": str(engine_path) if engine_path else None,
         "identity_psnr": round(float(np.mean(id_psnr)), 3),
         "student_psnr": round(float(np.mean(st_psnr)), 3),
         "delta_psnr": round(float(np.mean(st_psnr) - np.mean(id_psnr)), 3),

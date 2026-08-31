@@ -1,20 +1,25 @@
 {
   "purpose": "nr86 overnight research toward: student beats identity and reports measured tiles + ms on a 3090",
   "started": "2026-08-31T04:47:00Z",
-  "tick": 4,
-  "next": "real_capture",
+  "tick": 12,
+  "loop": "stopped",
+  "next": "dxhr_depth_redump",
   "done": [
     "smoke200",
     "diagnose_skip_quality",
     "trt_fp16_720p",
     "no_ampere_until_skip_is_a_latency_win",
-    "trt_student_in_run_frame"
+    "trt_student_in_run_frame",
+    "from_dump_cli",
+    "capture_addon_built",
+    "dxhr_first_dump",
+    "dxhr_smoke200"
   ],
-  "blocked_on": ["real_capture_dump"],
+  "blocked_on": ["dxhr_depth_r24_g8_typeless"],
   "do_not": ["ampere400", "int8_qdq", "grow_width"],
-  "notes": "TRT student is wired into run_frame. Synth skip+dirty is 6.48 ms/frame and still +3.58 dB. Milestone left: identity on a real capture.",
-  "last_started": "2026-08-31T05:21:00Z",
-  "last_finished": "2026-08-31T05:24:00Z",
+  "notes": "DXHR F9 dump ingested. Synth weights fail identity (-8.76 dB). Smoke trained on the dump passes (+2.16 dB). Depth still missing; HUD on; same-scene train/eval.",
+  "last_started": "2026-08-31T16:41:22Z",
+  "last_finished": "2026-08-31T16:48:42Z",
   "findings": {
     "smoke200_delta_psnr": 3.584,
     "hybrid_skip_dirty_delta_psnr": 3.584,
@@ -23,6 +28,10 @@
     "trt_skip_dirty_512_mean_ms": 6.484,
     "beats_pytorch_fullframe_ms": true,
     "tensorrt_fp16_858x482_mean_ms": 5.355,
-    "lesson": "TensorRT student plus GPU warp/mask beats 10 ms PyTorch full-frame on synth. Still need one real game dump."
+    "dxhr_synth_weights_delta_psnr": -8.755,
+    "dxhr_trained_delta_psnr": 2.157,
+    "dxhr_trained_skip_dirty_delta_psnr": 2.12,
+    "dxhr_trt_720p_cli_mean_ms": 9.293,
+    "lesson": "Real-game identity needs weights trained on that dump. Synth does not transfer. Next: depth-capable addon32 + new F9 burst."
   }
 }

@@ -1,0 +1,21 @@
+{
+  "title": "Deus Ex Human Revolution first real-game from-dump",
+  "src": "second F9 burst (287 frames @ 09:35); eval used first 32",
+  "resolution_capture": [1920, 1080],
+  "taught": "1280x720",
+  "depth": "missing — r24_g8_typeless not unpacked at capture time",
+  "hud": "on (no vanilla hide)",
+  "ckpt": "runs/overnight/smoke200/student.pt",
+  "identity_psnr": 28.869,
+  "eval": {
+    "skip_dirty_trt": {"delta_psnr": -8.755, "student_psnr": 20.114, "paths": {"fullframe": 16, "warp_clean": 13, "fullframe_dirty": 3}},
+    "fullframe_pytorch": {"delta_psnr": -8.757, "student_psnr": 20.112},
+    "fullframe_trt": {"delta_psnr": -8.753, "student_psnr": 20.116},
+    "ablate_depth": {"delta_psnr": -8.757},
+    "ablate_rgb": {"delta_psnr": -8.757}
+  },
+  "mask_fill_mean": 0.047,
+  "gate": "fail",
+  "trt_720p_cli_mean_ms": 10.75,
+  "lesson": "Smoke student trained on synth does not transfer to DXHR. Identity task is easier (28.9 dB) than synth (22.2). Skip is not the cause: full-frame also -8.76 dB. Depth was zero; HUD is in the pixels."
+}

@@ -86,6 +86,7 @@ static const char *depth_format_name(format fmt)
 	case format::d24_unorm_s8_uint:
 	case format::d24_unorm_x8_uint:
 	case format::r24_unorm_x8_uint:
+	case format::r24_g8_typeless:
 		return "d24_unorm";
 	case format::d16_unorm:
 		return "d16_unorm";
@@ -271,6 +272,7 @@ static bool unpack_depth(
 		case format::d24_unorm_s8_uint:
 		case format::d24_unorm_x8_uint:
 		case format::r24_unorm_x8_uint:
+		case format::r24_g8_typeless:
 			for (uint32_t x = 0; x < w; ++x)
 			{
 				uint32_t p;

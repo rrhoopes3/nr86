@@ -22,6 +22,9 @@ engines/
 # CMake / MSVC
 addons/**/out/
 addons/**/build/
+addons/**/build32/
+*.addon64
+*.addon32
 *.user
 *.suo
 .vs/

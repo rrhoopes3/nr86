@@ -44,7 +44,8 @@ python -m nr86 train --data datasets/synth --preset smoke --steps 40 --out runs/
 python -m nr86 eval --ckpt runs/smoke/student.pt --data datasets/synth
 python -m nr86 eval --ckpt runs/smoke/student.pt --data datasets/synth --every-n 2 --dirty-tiles --ablate none
 python -m nr86 bench --ckpt runs/smoke/student.pt --size 1280x720 --try-trt
-python -m nr86 bench --ckpt runs/smoke/student.pt --data datasets/synth --every-n 2 --dirty-tiles
+python -m nr86 bench --ckpt runs/smoke/student.pt --data datasets/synth --every-n 2 --dirty-tiles --use-trt
+python -m nr86 from-dump --src "D:\Games\SomeGame\nr86_capture" --ckpt runs\overnight\smoke200\student.pt --use-trt
 python -m nr86 place --preset ampere --size 1920x1080
 ```
 
@@ -77,10 +78,13 @@ docs/                 architecture + measurement protocol
 
 ## Next (defensible result, not another DLL drop)
 
-1. TensorRT-RTX SDK on PATH — a real FP16 720p engine number.
-2. One offline title, HUD off, F9 burst. `inspect` → `ingest` → `selfteach`.
-3. `eval` must beat identity on that capture. Ablate RGB / depth / mvec.
-4. Only then QDQ INT8 on `ampere_int8`. Postpone INT4, 2:4, and RTXNS.
+1. One offline title, HUD off, **F9 burst**. Then `nr86 from-dump`.
+2. `eval` must beat identity on that capture. Ablate RGB / depth / mvec.
+3. Only then QDQ INT8 on `ampere_int8`. Postpone INT4, 2:4, and RTXNS.
+
+TRT-RTX FP16 is already wired (`eval --use-trt`, `bench --use-trt`). Synth skip+dirty
+on this 3090 is **6.48 ms** at 512² and **+3.58 dB** vs identity — still not a
+real-game number.
 
 The milestone that turns this from a scaffold into systems research:
 **this student beats identity on real captures and runs in X ms on a 3090.**

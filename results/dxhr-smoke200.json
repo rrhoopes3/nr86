@@ -1,0 +1,25 @@
+{
+  "title": "smoke200 trained on DXHR second burst",
+  "ckpt": "runs/dxhr-smoke200/student.pt",
+  "params": 193043,
+  "steps": 200,
+  "train_loss_l1": 0.0138,
+  "data": "datasets/q720-dxhr",
+  "frames_taught": 319,
+  "eval_frames": 32,
+  "depth": "zeros (capture format r24_g8_typeless)",
+  "hud": "on",
+  "identity_psnr": 28.869,
+  "eval": {
+    "fullframe_pytorch": {"student_psnr": 31.026, "delta_psnr": 2.157, "gate": "pass"},
+    "skip_dirty_pytorch": {"student_psnr": 30.989, "delta_psnr": 2.12, "gate": "pass", "paths": {"fullframe": 16, "warp_clean": 13, "fullframe_dirty": 3}},
+    "fullframe_trt": {"student_psnr": 31.023, "delta_psnr": 2.154, "gate": "pass"},
+    "skip_dirty_trt": {"student_psnr": 30.986, "delta_psnr": 2.117, "gate": "pass"},
+    "ablate_depth": {"delta_psnr": 2.157, "note": "depth already zero"},
+    "ablate_rgb_keeps_color_drops_aux": {"delta_psnr": 2.158}
+  },
+  "mask_fill_mean": 0.047,
+  "trt_720p_cli_mean_ms": 9.293,
+  "synth_student_on_this_data": -8.755,
+  "lesson": "Same smoke student beats identity on DXHR after training on the dump (+2.16 dB). Synth weights do not transfer (-8.76). Same-scene train/eval; HUD on; no depth."
+}

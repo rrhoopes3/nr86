@@ -50,6 +50,8 @@ def main(argv: list[str] | None = None) -> int:
         default="none",
         help="Zero input channels: rgb keeps color only; depth/mvec drop that cue",
     )
+    p_ev.add_argument("--use-trt", action="store_true")
+    p_ev.add_argument("--engine", type=Path, default=None)
 
     p_e = sub.add_parser("export", help="Export student ONNX")
     p_e.add_argument("--ckpt", type=Path, required=True)
@@ -95,6 +97,16 @@ def main(argv: list[str] | None = None) -> int:
 
     p_ins = sub.add_parser("inspect", help="Validate a raw capture folder")
     p_ins.add_argument("--src", type=Path, required=True)
+
+    p_fd = sub.add_parser("from-dump", help="Inspect + ingest + selfteach + eval a capture dump")
+    p_fd.add_argument("--src", type=Path, required=True)
+    p_fd.add_argument("--ckpt", type=Path, required=True)
+    p_fd.add_argument("--raw", type=Path, default=Path("datasets/raw"))
+    p_fd.add_argument("--taught", type=Path, default=Path("datasets/q720"))
+    p_fd.add_argument("--size", default="1280x720")
+    p_fd.add_argument("--every-n", type=int, default=2)
+    p_fd.add_argument("--dirty-tiles", action="store_true", default=True)
+    p_fd.add_argument("--use-trt", action="store_true")
 
     p_tr = sub.add_parser("trt", help="Build TensorRT-RTX engine from ONNX")
     p_tr.add_argument("--onnx", type=Path, required=True)
@@ -146,6 +158,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             args.every_n,
             dirty_tiles=args.dirty_tiles,
             ablate=args.ablate,
+            use_trt=args.use_trt,
+            engine=args.engine,
         )
         return 0
     if args.cmd == "export":
@@ -204,6 +218,20 @@ def _dispatch(args: argparse.Namespace) -> int:
         from nr86.inspect_capture import inspect_capture
 
         print(json.dumps(inspect_capture(args.src), indent=2))
+        return 0
+    if args.cmd == "from-dump":
+        from nr86.from_dump import from_dump
+
+        from_dump(
+            args.src,
+            args.raw,
+            args.taught,
+            args.ckpt,
+            size=args.size,
+            every_n=args.every_n,
+            dirty_tiles=args.dirty_tiles,
+            use_trt=args.use_trt,
+        )
         return 0
     if args.cmd == "trt":
         from nr86.engine_trt import build_engine

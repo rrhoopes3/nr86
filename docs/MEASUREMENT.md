@@ -16,10 +16,9 @@ python -m nr86 doctor
 ```
 
 Expected on this box: `NVIDIA GeForce RTX 3090`, compute `8.6`, 24576 MiB,
-`fp8=no`, `int8=yes`, `sparsity_2_4=yes`. TensorRT-RTX on PATH is still
-the real engine; every current ms number is a PyTorch proxy until then.
-`nr86 bench --try-trt` reports availability without inventing an FP16
-engine time.
+`fp8=no`, `int8=yes`, `sparsity_2_4=yes`. TensorRT-RTX is installed;
+`eval --use-trt` / `bench --use-trt` run the student as an engine.
+Synth skip+dirty 512² was 6.48 ms on this 3090 — still not a capture number.
 
 ## Always log these columns
 
@@ -52,9 +51,10 @@ Run in order. Stop at the first fail.
    Gate: `student_psnr >= identity_psnr + 0.25` and `beats_identity=true`.
    Use the self-teacher, not a placeholder enhancer. If this fails, shrink
    the problem (input res) before growing the student.
-4. **Capture → ingest** — `inspect` then `ingest` on a dump whose first
-   frame has `"prev_color": null`. Gate: ingest does not crash;
-   later burst frames have Farneback or file mvec.
+4. **Capture → ingest** — `nr86 from-dump --src <nr86_capture> --ckpt …`
+   (inspect + ingest + selfteach + eval). First frame `"prev_color": null`
+   is valid. Gate: ingest does not crash; later burst frames have Farneback
+   or file mvec.
 5. **Measured skip / dirty tiles** —
    `nr86 bench --data <set> --every-n 2 --dirty-tiles`.
    Gate: `tiles_executed < tiles_total` on a panning sequence, and

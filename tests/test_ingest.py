@@ -96,3 +96,24 @@ def test_ingest_first_frame_null_prev_color(tmp_path: Path):
     assert rows[0]["mvec_source"] == "zero"
     assert rows[1]["mvec_source"] in ("farneback", "zero_no_cv2", "file")
     assert f1.color.shape == (16, 16, 3)
+
+
+def test_from_dump_inspect_ingest_selfteach_eval(tmp_path: Path):
+    from nr86.from_dump import from_dump
+    from nr86.models.student import build_student, save_student
+
+    dump = _write_dump(tmp_path)
+    ckpt = tmp_path / "student.pt"
+    save_student(build_student("smoke"), ckpt)
+    out = from_dump(
+        dump,
+        tmp_path / "raw",
+        tmp_path / "taught",
+        ckpt,
+        size="16x16",
+        every_n=1,
+        dirty_tiles=False,
+    )
+    assert out["ingested"] == 2
+    assert out["eval"]["frames"] == 2
+    assert out["eval"]["backend"] == "pytorch"

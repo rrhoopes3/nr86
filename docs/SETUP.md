@@ -41,17 +41,16 @@ cmake -S addons/nr86_capture -B addons/nr86_capture/build -G "Visual Studio 17 2
 cmake --build addons/nr86_capture/build --config Release
 ```
 
-Copy `nr86_capture.addon64` next to the game exe. Enable Generic Depth.
+Copy `addons/nr86_capture/nr86_capture.addon64` (built locally) next to the game exe.
+Enable Generic Depth. ReShade must have **full add-on support**.
 **Hide the HUD.** F10 = one frame; **F9 burst** so `color_prev.bmp` exists
 for Farneback. Then:
 
 ```powershell
-python -m nr86 inspect --src "D:\Games\SomeGame\nr86_capture"
-python -m nr86 ingest --src "D:\Games\SomeGame\nr86_capture" --out datasets/raw
-python -m nr86 selfteach --data datasets/raw --out datasets/q720 --size 1280x720
-python -m nr86 eval --ckpt runs/smoke/student.pt --data datasets/q720
-python -m nr86 eval --ckpt runs/smoke/student.pt --data datasets/q720 --ablate depth
-python -m nr86 bench --ckpt runs/smoke/student.pt --data datasets/q720 --every-n 2 --dirty-tiles
+python -m nr86 from-dump --src "D:\Games\SomeGame\nr86_capture" --ckpt runs\overnight\smoke200\student.pt --use-trt
+# same as inspect → ingest → selfteach 1280x720 → eval --every-n 2 --dirty-tiles
+python -m nr86 eval --ckpt runs\overnight\smoke200\student.pt --data datasets/q720 --ablate depth
+python -m nr86 bench --ckpt runs\overnight\smoke200\student.pt --data datasets/q720 --every-n 2 --dirty-tiles --use-trt
 ```
 
 `cv` extra (`opencv`) is required for mvec. Without it, every-N placement
