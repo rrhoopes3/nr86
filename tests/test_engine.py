@@ -19,12 +19,17 @@ def test_legal_blocks_leak_names(tmp_path: Path):
 
 def test_presets_param_bands():
     smoke = count_params(build_student("smoke"))
+    shallow = count_params(build_student("smoke_shallow"))
     ampere = count_params(build_student("ampere"))
     target = count_params(build_student("target"))
     assert smoke < 2_000_000
+    assert shallow < smoke
     assert 2_000_000 < ampere < 20_000_000
     assert 10_000_000 < target < 50_000_000
     assert smoke < ampere < target
+    assert build_student("smoke_shallow").spec.levels == 2
+    assert build_student("smoke_shallow").spec.base == 16
+    assert any(isinstance(mod, torch.nn.GroupNorm) for mod in build_student("smoke_shallow").modules())
 
 
 def test_student_residual_shape():

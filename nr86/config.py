@@ -47,6 +47,10 @@ PRESETS: dict[str, StudentSpec] = {
     "smoke_int8": StudentSpec(
         name="smoke_int8", base=16, levels=3, tile=128, overlap=16, norm="none"
     ),
+    # Same first-layer width as smoke; one fewer downsample. Not a wider net.
+    "smoke_shallow": StudentSpec(
+        name="smoke_shallow", base=16, levels=2, tile=128, overlap=16, norm="gn"
+    ),
     "ampere": StudentSpec(name="ampere", base=32, levels=4, tile=256, overlap=16, norm="gn"),
     "ampere_int8": StudentSpec(
         name="ampere_int8", base=32, levels=4, tile=256, overlap=16, norm="none"
