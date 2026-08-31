@@ -1,0 +1,59 @@
+{
+  "preset": "smoke_int8",
+  "data": "datasets\\q540-dxhr-holdout",
+  "out": "runs\\dxhr-depth-smoke-q540-int8",
+  "train_frames": 105,
+  "eval_offset": 105,
+  "eval_frames": 32,
+  "chunk": 200,
+  "min_gain_db": 0.02,
+  "history": [
+    {
+      "steps": 200,
+      "holdout_full": {
+        "identity_psnr": 25.568,
+        "student_psnr": 25.23,
+        "delta_psnr": -0.337,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "holdout_skip_dirty": {
+        "identity_psnr": 25.568,
+        "student_psnr": 25.217,
+        "delta_psnr": -0.35,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 16,
+          "fullframe_dirty": 15,
+          "warp_clean": 1
+        }
+      },
+      "holdout_ablate_depth": {
+        "identity_psnr": 25.568,
+        "student_psnr": 25.205,
+        "delta_psnr": -0.363,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      },
+      "train_full": {
+        "identity_psnr": 31.457,
+        "student_psnr": 31.313,
+        "delta_psnr": -0.144,
+        "beats_identity": false,
+        "gate": "fail: student does not beat identity \u2014 fast at doing nothing",
+        "paths": {
+          "fullframe": 32
+        }
+      }
+    }
+  ],
+  "best_delta_psnr": -0.337,
+  "status": "running"
+}
