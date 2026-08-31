@@ -1,0 +1,24 @@
+{
+  "purpose": "nr86 overnight research toward: student beats identity and reports measured tiles + ms on a 3090",
+  "started": "2026-08-31T04:47:00Z",
+  "tick": 1,
+  "next": "diagnose_skip_quality",
+  "done": ["smoke200"],
+  "blocked_on": ["tensorrt_rtx_sdk", "real_capture_dump"],
+  "notes": "Do not quote 13x as measured. No INT8 QDQ until TRT FP16 exists. No NVIDIA leak blobs.",
+  "last_started": "2026-08-31T04:49:09Z",
+  "last_finished": "2026-08-31T04:49:52Z",
+  "findings": {
+    "smoke200_delta_psnr": 3.584,
+    "smoke200_gate": "pass",
+    "skip_dirty_delta_psnr": -2.062,
+    "skip_dirty_gate": "fail",
+    "skip_dirty_executed_frac": 0.5,
+    "skip_dirty_mean_ms": 27.911,
+    "fullframe_mean_ms_720p": 10.72,
+    "ablate_depth_delta_psnr": -3.224,
+    "ablate_mvec_delta_psnr": 2.78,
+    "tensorrt_fp16": false,
+    "lesson": "every-N skip ignores residual dirty pixels on a pan, so quality dies. Tiled dirty path is slower than fullframe PyTorch. Next: hybrid reuse + fullframe student frames."
+  }
+}

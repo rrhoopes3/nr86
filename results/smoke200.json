@@ -1,0 +1,33 @@
+{
+  "preset": "smoke",
+  "steps": 200,
+  "params": 193043,
+  "data": "datasets/synth",
+  "device": "cuda",
+  "eval_full": {
+    "identity_psnr": 22.21,
+    "student_psnr": 25.794,
+    "delta_psnr": 3.584,
+    "beats_identity": true
+  },
+  "eval_skip_dirty": {
+    "every_n": 2,
+    "dirty_tiles": true,
+    "delta_psnr": -2.062,
+    "beats_identity": false,
+    "tiles_executed": 300,
+    "tiles_total": 600
+  },
+  "ablations_delta_psnr": {
+    "none": 3.584,
+    "rgb": -1.519,
+    "depth": -3.224,
+    "mvec": 2.78
+  },
+  "bench": {
+    "sequence_skip_dirty_mean_ms": 27.911,
+    "eager_tiled_mean_ms": 72.06,
+    "fullframe_mean_ms": 10.72,
+    "tensorrt_fp16": false
+  }
+}
