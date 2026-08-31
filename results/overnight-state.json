@@ -3,8 +3,8 @@
   "started": "2026-08-31T18:37:00Z",
   "loop": "running",
   "loop_name": "nr86day",
-  "tick": 3,
-  "day_tick": 3,
+  "tick": 4,
+  "day_tick": 4,
   "max_ticks": 12,
   "next": "combat_f9",
   "done": [
@@ -18,12 +18,12 @@
   "blocked_on": ["combat_f9"],
   "now_eligible": ["combat_f9"],
   "do_not": ["ampere400", "grow_width", "shrink_below_960x540", "qdq_on_failed_nogn"],
-  "notes": "smoke_shallow plateaued at 1000 loop steps, peak +0.089 hold-out / lobby -0.099. Extra UNet level is load-bearing. INT8 and shallower are both dead ends on quality. Happy path: GN FP16 smoke 960x540 (5.03 / 7.64 ms, hold-out +0.42). Next is a combat / fast-turn F9. Do not grow width.",
+  "notes": "Day tick 4: no new F9. Newest capture meta is still 10:43 (room2, IDs 000000-000202). Leftover 000203+ not ingested. Happy path unchanged: GN FP16 smoke 960x540. Next wake 45 min unless a combat burst lands.",
   "findings": {
     "trt_resident_q540_fp16_mean_ms": 5.034,
     "q540_retrain_holdout_delta": 0.421,
     "smoke_int8_plateau_holdout_delta": 0.192,
     "smoke_shallow_plateau_holdout_delta": 0.089,
-    "smoke_shallow_room2_full_delta": -0.099
+    "newest_capture_meta": "2026-08-31T10:43:04"
   }
 }
