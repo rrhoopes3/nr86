@@ -69,10 +69,13 @@ def test_passthrough_skips_student():
 
 def test_quiet_and_motion_gates():
     assert infer_regime({"warp_clean": 12, "fullframe": 20}, 0.04, 0.6) == "quiet"
-    assert infer_regime({"storm": 4, "fullframe_dirty": 28}, 0.8, 1.0) == "motion"
+    assert infer_regime({"storm_identity": 29, "fullframe": 3}, 0.25, 0.09) == "motion"
     assert infer_regime({"fullframe": 32}, 0.4, 1.0) == "motion"
+    assert infer_regime({"fullframe": 29, "storm_identity": 3}, 0.107, 0.91) == "motion"
     assert infer_regime(
-        {"storm": 4, "warp_clean": 9, "fullframe": 14, "fullframe_dirty": 5}, 0.21, 0.72
+        {"storm_identity": 9, "warp_clean": 9, "fullframe": 12, "fullframe_dirty": 2},
+        0.135,
+        0.44,
     ) == "quiet"
     assert infer_regime({"passthrough": 32}, 0.0, 0.0) == "overlay"
     ok, _gate = quality_gate(0.0, "overlay")

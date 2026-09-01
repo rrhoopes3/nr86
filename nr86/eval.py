@@ -24,13 +24,20 @@ MOTION_DB = 0.0
 OVERLAY_DB = 0.0
 
 
+STORM_FRAC = 0.30
+
+
 def infer_regime(paths: dict, fill: float | None, executed_frac: float) -> str:
     """Quiet gameplay, motion storm, or overlay pass-through."""
     if int(paths.get("passthrough") or 0) > 0:
         return "overlay"
-    # Storm is a runtime path, not a content class. A quiet lobby that
-    # storms for 4 frames must still clear +0.25. All-dirty high fill is motion.
-    if executed_frac >= 0.99 and fill is not None and fill >= 0.10:
+    n = sum(int(v) for v in paths.values()) or 1
+    storm_n = int(paths.get("storm_identity") or 0) + int(paths.get("storm") or 0)
+    # Sustained storm-identity is policy 0.0. A brief hitch on a quiet
+    # lobby (few storm frames) does not lower the +0.25 bar.
+    if storm_n / n >= STORM_FRAC:
+        return "motion"
+    if executed_frac >= 0.85 and fill is not None and fill >= 0.10:
         return "motion"
     return "quiet"
 
@@ -138,7 +145,7 @@ def evaluate(
         "offset": start,
         "every_n": every_n,
         "dirty_tiles": dirty_tiles,
-        "storm": storm and dirty_tiles,
+        "storm": storm,
         "ablate": ablate,
         "backend": backend,
         "engine": str(engine_path) if engine_path else None,

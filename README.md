@@ -1,8 +1,7 @@
 # nr86
 
-Research scaffold for an Ampere (`sm_86`) neural-rendering student.
-Not a working DLSS workaround, not a shipping neural-rendering engine,
-and not an INT8 product yet.
+**v0.1** — measured, gated, weights-owned Ampere student. Not a DLSS
+DLL drop. Not a 720p product. Not INT8 yet.
 
 The hardware thesis is still the right one: a 3090 has no FP8 MMA. The
 leaked DLSS 5 Neural Rendering path is an FP8 teacher JIT-compiled as
@@ -18,7 +17,7 @@ INT8 / INT4 / 2:4 sparsity are **roadmap**, not implementation.
 | Capture → ingest (`nr86 from-dump`; first-frame `prev_color: null` is valid) | working — 32-bit and 64-bit addons |
 | Self-teacher (Lanczos + depth punch / cheap + mvec smear) | working — still a resample teacher |
 | PSNR/SSIM eval vs teacher **and** identity | working (`nr86 eval`, `--use-trt`, `--offset`) |
-| Residual-after-warp mask; skip-frame + dirty-tile runtime | working — measured tiles + ms |
+| Residual-after-warp mask; skip + dirty tiles; storm-identity | working — v0.1 policy |
 | Placement: average **and** worst-case | **cost model**, not measured |
 | Residual UNet (`gn` FP16 / `smoke_int8` is same width, `norm=none`) | working — smoke only |
 | TensorRT-RTX FP16 student in `run_frame` | working on this 3090 |
@@ -34,24 +33,31 @@ Pulled in as git submodules / vendored headers (open or official only):
 Not pulled: leaked `nvngx_dlssnr.dll`, Discord Ampere addons, DLSS5-Feeder, OptiScaler.
 See [LEGAL.md](LEGAL.md).
 
-## Measured on this 3090 (honest)
+## v0.1 on this 3090 (honest)
 
-**Synth** (24 frames, 512², smoke 193k): identity 22.21 → 25.79 dB, **+3.58 dB**.
-Hybrid skip+dirty holds that after the warp-without-mask bug (−2.06 dB).
-PyTorch full-frame ~10 ms. TRT skip+dirty **6.48 ms**. CLI 5.35 ms at 858×482
-had H2D/D2H **disabled** — do not quote it as a full pass.
+Shipping graph: **smoke 193k GN, 960×540**, city-mix weights
+(`runs/dxhr-city-mix/student_best.pt`). Storm-identity after 3 frames
+with residual fill ≥ 0.05; exit when fill < 0.02 for 3 frames. Overlay
+pass-through when color stats leave the training envelope.
 
-**Deus Ex: Human Revolution** (1920×1080 dump → 1280×720 teach, HUD on):
-synth weights **−8.76 dB**. Same-scene train/eval with no depth **+2.16 dB** —
-that did not hold out (−2.16 dB) once Generic Depth was a real buffer.
-Smoke trained on a depth dump, last-32 hold-out **+0.50 dB** at 3200 steps.
-A later Sarif HQ lobby burst (unseen room) **+1.55 dB** full-frame /
-**+1.14 dB** skip+dirty. Zeroing depth on that room is **−3.96 dB**.
-720p TRT student-only **11.4 ms**. After GPU-resident `FrameRunner`
-(pinned color/mvec H2D, prev on device, no RGB D2H): skip+dirty **mean
-12.8 ms**, student-path **p95 17.7 ms**, warp_clean **3.2 ms**. Gate is
-skip+dirty mean ≤ 8.33 ms **and** student-path p95 ≤ 16.67 ms on 1280×720.
-Both fail. The 10.7 ms line (eager 858×482) is retired.
+| Scene | Path | ΔPSNR | Regime | Gate |
+| --- | --- | --- | --- | --- |
+| Sarif lobby | skip+dirty | **+1.119** | quiet ≥ +0.25 | pass |
+| Detroit plaza (unseen space) | full | **+1.037** | quiet ≥ +0.25 | pass |
+| City look-up | skip+dirty | **+0.005** | motion 0.0 policy | pass |
+| Factory yard | skip+dirty | **+0.155** | motion 0.0 policy | pass |
+| Warehouse combat | skip+dirty | **+0.159** | motion 0.0 policy | pass |
+| Unseen combat3 | skip+dirty | **+0.143** | motion 0.0 policy | pass |
+| Smart Vision last32 | full | **0.000** | overlay 0.0 policy | pass |
+
+Latency **cold** (dxhr.exe closed), 960×540 TRT FP16, skip+dirty:
+lobby mean was **6.42 ms** / combat all-dirty **8.004 ms** before
+storm-identity. Student-path p95 is `fullframe` + `fullframe_dirty`
+only. Game-open every-n=1 ~11.4 ms is clocks. 720p still misses
+8.33/16.67 — v0.1 is the 540p student, not the product tensor.
+
+Synth +3.58 dB / 6.48 ms remains a synth number. ~13× is a cost model.
+Do not quote CLI TRT times as a full H2D+compute pass.
 
 ## Quick start (this machine: 3090, 24 GB, sm_86)
 
@@ -86,12 +92,9 @@ latency gate on 1280×720.
 
 24 GB VRAM is the one thing that does not suck: a 148M teacher plus
 activations fits. Distilling a 20–40M student on one 3090 is a week, not a
-cluster. The smoke preset is minutes. **Do not grow width.** Held-out DXHR
-clears +0.25 dB on quiet scenes; motion storms must stay ≥ 0.0 dB.
-Latency is judged on the **1280×720** product tensor:
-skip+dirty **mean** under 8.33 ms (120 Hz frame) **and** student-path
-**p95** under 16.67 ms (60 Hz frame). The old 10.7 ms line was eager
-PyTorch at 858×482 — retired.
+cluster. The smoke preset is minutes. **Do not train wider until a
+storm-identity timing map says the ms fit.** Quiet ≥ +0.25 measured;
+storms and overlays are 0.0 by policy. Latency cold, 960×540.
 
 ## Repo layout
 
@@ -105,9 +108,10 @@ docs/                 architecture + measurement protocol
 
 ## Next
 
-Keep smoke. The copy tax is mostly gone. 720p FP16 student-path p95 is
-17.7 ms and skip+dirty mean is 12.8 ms — both miss. Next lever is **cut
-pixels**, then INT8, then a shallower net. A combat / fast-turn dump is
-the quality *and* perf scare (quiet-lobby fill 0.137 flatters skip).
+v0.1 is the 193k student with storm-identity. Next is a **junk-weight
+base-24 INT8 re-bench** under that policy (quiet-scene mean, not
+all-dirty combat). Train wider only if that envelope says yes.
+Temporal (9-ch warped_out) stays optional and composes under the
+identity floor.
 
 Do not put this on multiplayer.

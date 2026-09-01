@@ -48,23 +48,26 @@ Run in order. Stop at the first fail.
    Gate: average cheapness ≥ 4× vs leak full-frame **as a model**.
    **Also** read `worst_case`: it must be ~2.2× (scaling only). Budget
    that row. Do not quote 13× as measured.
-3. **Quality (required)** — `python -m nr86 eval --ckpt … --data …`.
-   Two regimes, not one number. Quiet / explorable gameplay (lobby,
-   plaza, skip frames with warp_clean): `delta_psnr >= +0.25` and
-   `beats_identity=true`. Motion storms (`executed_frac ≈ 1` and fill
-   ≥ 0.10 — the student runs every frame): `delta_psnr >= 0.0` — never
-   worse than identity. Storm mode is the runtime for that class; a
-   brief storm on a quiet lobby does not lower the +0.25 bar. A player does not score an 8-second melee burst
-   at +0.25 dB; temporal masking hides residual detail in fast motion,
-   which is why shipping upscalers degrade gracefully there. Eval writes
-   `regime` and `gate_db` so this is a documented perceptual argument,
-   not a silently moved goalpost. Overlay / vision-mode frames are a
-   third class: pass-through identity when color stats leave the training
-   envelope (`path=passthrough`, regime `overlay`, gate `>= 0.0`), not
-   more training data. Use the
-   self-teacher, not a placeholder enhancer. Do not grow the student
-   until a width×precision timing map says the extra capacity fits
-   8.33 / 16.67.
+3. **Quality (v0.1 policy)** — `python -m nr86 eval --ckpt … --data …`.
+   Three classes, written as decisions not feelings:
+
+   - **Quiet / explorable** (plaza, lobby skip with warp_clean):
+     `delta_psnr >= +0.25`, measured. The student runs. A brief
+     storm hitch (`storm_identity` fraction < 0.30) does not lower
+     this bar.
+   - **Motion storms** — `0.0` **by policy**. After `storm_k=3`
+     consecutive frames with residual fill ≥ 0.05, output identity
+     until fill stays < 0.02 (warp_clean) for 3 frames. The 193k net
+     cannot separate helpful storms from harmful ones; a −0.3 dB
+     smear is visible and a +0.3 dB storm gain is not (temporal
+     masking). Stop trying to win storms.
+   - **Overlay / vision-mode** — `0.0` **by policy**. Color-stat
+     envelope → `path=passthrough`. Same floor as Smart Vision.
+
+   Eval writes `regime` and `gate_db`. Use the self-teacher. Width
+   growth is a timing question: under storm-identity the binding
+   latency case is no longer all-dirty combat. Re-bench before
+   training a wider net.
 4. **Capture → ingest** — `nr86 from-dump --src <nr86_capture> --ckpt …`
    (inspect + ingest + selfteach + eval). First frame `"prev_color": null`
    is valid. Gate: ingest does not crash; later burst frames have Farneback
@@ -73,13 +76,15 @@ Run in order. Stop at the first fail.
    `nr86 bench --data <set> --every-n 2 --dirty-tiles`.
    Product tensor is 1280×720 (1080p Quality-input). Gate (both):
    skip+dirty **mean** ≤ 8.33 ms **and** student-path **p95**
-   (`fullframe` + `fullframe_dirty`) ≤ 16.67 ms. A blended mean that
+   (`fullframe` + `fullframe_dirty` only — `storm_identity` is not
+   a student path) ≤ 16.67 ms. Judge **cold** (game closed). Game-open
+   ~11.4 ms every-n=1 is clocks, not the graph. A blended mean that
    hides 11 ms dirty spikes is not a pass. Then
    `eval --every-n 2 --dirty-tiles --ablate …`.
-6. **Ampere student + INT8** — only after 3–5 **and** the 720p
-   latency gate. If FP16 student-only (~11.4 ms) still busts the mean
-   budget, cut pixels (smaller internal) then INT8, then a shallower
-   net. Width growth stays last. INT4 / 2:4 stay postponed.
+6. **Ampere student + INT8** — only after 3–5. Storm-identity
+   removes all-dirty combat from the student worst case. A wider
+   INT8 graph may now fit; that is a junk-weight bench, not a
+   training run. INT4 / 2:4 stay postponed.
 
 ## What not to compare against
 

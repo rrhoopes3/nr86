@@ -201,7 +201,7 @@ def test_frame_runner_holds_prev_on_cpu():
     assert net.calls == calls
 
 
-def test_storm_drops_warp_after_sustained_fill():
+def test_storm_identity_after_sustained_fill():
     net = CountingNet()
     runner = FrameRunner(
         net,
@@ -217,19 +217,52 @@ def test_storm_drops_warp_after_sustained_fill():
     depth = np.zeros((h, w), dtype=np.float32)
     mvec = np.zeros((h, w, 2), dtype=np.float32)
     paths: list[str] = []
+    calls_before_storm = 0
     for i in range(6):
         color = np.full((h, w, 3), float(i % 2), dtype=np.float32)
         x = _packed(color, depth, mvec)
-        _pred, stats = runner.run(x, color=color, mvec=mvec, frame_index=i)
+        pred, stats = runner.run(x, color=color, mvec=mvec, frame_index=i)
         paths.append(stats.path)
-    assert "storm" in paths
-    assert paths[-1] == "storm"
-    assert net.calls >= 1
+        if stats.path == "storm_identity":
+            assert stats.ran_student is False
+            assert np.allclose(pred, color, atol=1e-5)
+        else:
+            calls_before_storm = net.calls
+    assert "storm_identity" in paths
+    assert paths[-1] == "storm_identity"
+    assert net.calls == calls_before_storm
 
-    still = np.full((h, w, 3), 1.0, dtype=np.float32)
+    # Same color as the last storm frame. Exit needs storm_k low-fill frames.
+    still = np.full((h, w, 3), float(5 % 2), dtype=np.float32)
     x = _packed(still, depth, mvec)
-    _pred, stats = runner.run(x, color=still, mvec=mvec, frame_index=6)
-    assert stats.path != "storm"
+    stats = None
+    for j in range(3):
+        _pred, stats = runner.run(x, color=still, mvec=mvec, frame_index=6 + j)
+    assert stats is not None and stats.path != "storm_identity"
+
+
+def test_brief_high_fill_does_not_enter_storm():
+    net = CountingNet()
+    runner = FrameRunner(
+        net,
+        every_n=1,
+        tile=8,
+        overlap=0,
+        dirty_tiles=True,
+        storm_k=3,
+        storm_fill=0.1,
+        storm_luma=0.02,
+    )
+    h = w = 16
+    depth = np.zeros((h, w), dtype=np.float32)
+    mvec = np.zeros((h, w, 2), dtype=np.float32)
+    dirty = np.zeros((h, w, 3), dtype=np.float32)
+    dirty[:8] = 1.0
+    quiet = np.full((h, w, 3), 0.4, dtype=np.float32)
+    for i, color in enumerate((dirty, dirty, quiet, quiet)):
+        x = _packed(color, depth, mvec)
+        _pred, stats = runner.run(x, color=color, mvec=mvec, frame_index=i)
+        assert stats.path != "storm_identity"
 
 
 def test_ablation_zeros_channels():

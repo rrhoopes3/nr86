@@ -300,7 +300,7 @@ def bench_sequence(
     path_ms = {k: _path_summary(v) for k, v in sorted(combined.items())}
     overall = _path_summary(all_frames)
     student_times: list[float] = []
-    for key in ("fullframe", "fullframe_dirty", "storm"):
+    for key in ("fullframe", "fullframe_dirty"):
         student_times.extend(combined.get(key) or [])
     student = _path_summary(student_times)
     mean_ms = overall["mean_ms"] if overall else None
@@ -341,7 +341,7 @@ def bench_sequence(
         "frames": n,
         "every_n": every_n,
         "dirty_tiles": dirty_tiles,
-        "storm": storm and dirty_tiles,
+        "storm": storm,
         "tile": spec.tile,
         "tiles_executed": last_exec,
         "tiles_total": last_total,
@@ -368,6 +368,7 @@ def bench_sequence(
             f"{backend} FrameRunner: prev_color/prev_out stay on GPU. "
             "Color/mvec H2D via pinned host buffers each frame (honest numpy harness). "
             "No D2H of RGB. Mean is all frames; student-path p95 is fullframe + "
-            "fullframe_dirty + storm (the stutter spike). 10.7 ms eager-858x482 is retired."
+            "fullframe_dirty only (storm_identity is not a student path). "
+            "10.7 ms eager-858x482 is retired."
         ),
     }

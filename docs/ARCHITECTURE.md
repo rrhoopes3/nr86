@@ -35,10 +35,11 @@ capture and ablate (`nr86 eval --ablate rgb|depth|mvec`).
 
 `python -m nr86 eval --ckpt … --data …` reports student PSNR/SSIM against
 the teacher **and** against identity (cheap color vs teacher). Quiet
-scenes must beat identity by ≥ 0.25 dB; motion storms must not go
-negative (`>= 0.0`). Overlay / vision-mode frames pass through as
-identity. Do not grow toward 20–40M until a timing map says the width
-fits the latency budget.
+scenes must beat identity by ≥ 0.25 dB. Motion storms and overlay /
+vision-mode frames are identity by policy (`storm_identity` after
+sustained residual fill; color-stat envelope for Smart Vision). Do
+not grow toward 20–40M until a timing map says the width fits the
+latency budget under storm-identity.
 
 Capture at the highest res the game will do (4K / DLAA / TAAU off). Hide
 the HUD. The addon hooks `reshade_finish_effects` — post-UI, display-referred

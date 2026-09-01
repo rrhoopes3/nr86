@@ -1,0 +1,153 @@
+{
+  "version": "v0.1",
+  "ckpt": "B:\\Rando Apps\\Nvda DLSS5 workaround\\runs\\dxhr-city-mix\\student_best.pt",
+  "policy": {
+    "quiet": "+0.25 measured",
+    "motion": "0.0 by policy (storm-identity)",
+    "overlay": "0.0 by policy (color envelope)",
+    "storm_k": 3,
+    "storm_fill": 0.05,
+    "storm_exit_fill": 0.02
+  },
+  "latency_note": "Quality table is v0.1. Cold TRT skip+dirty before this change: lobby 6.42 ms / all-dirty combat 8.004 ms (game closed). A post-reboot bench in this session was ~3x slow (clocks); do not replace those numbers with it. Storm-identity should make combat mean cheaper; re-bench on a warm GPU before judging base-24 INT8.",
+  "rows": {
+    "room2_skip": {
+      "delta_psnr": 1.119,
+      "regime": "quiet",
+      "gate_db": 0.25,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 12,
+        "warp_clean": 9,
+        "fullframe_dirty": 2,
+        "storm_identity": 9
+      },
+      "mask_fill_mean": 0.135,
+      "executed_frac": 0.4375
+    },
+    "plaza_full": {
+      "delta_psnr": 1.037,
+      "regime": "quiet",
+      "gate_db": 0.25,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 32
+      },
+      "mask_fill_mean": 0.04,
+      "executed_frac": 1.0
+    },
+    "holdout_last32": {
+      "delta_psnr": 0.02,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 3,
+        "storm_identity": 29
+      },
+      "mask_fill_mean": 0.373,
+      "executed_frac": 0.0938
+    },
+    "lookup_skip": {
+      "delta_psnr": 0.005,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 2,
+        "fullframe_dirty": 1,
+        "storm_identity": 29
+      },
+      "mask_fill_mean": 0.107,
+      "executed_frac": 0.0938
+    },
+    "lookup_full": {
+      "delta_psnr": 0.005,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 3,
+        "storm_identity": 29
+      },
+      "mask_fill_mean": 0.107,
+      "executed_frac": 0.0938
+    },
+    "yard_skip": {
+      "delta_psnr": 0.155,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 2,
+        "fullframe_dirty": 2,
+        "storm_identity": 28
+      },
+      "mask_fill_mean": 0.195,
+      "executed_frac": 0.125
+    },
+    "yard_full": {
+      "delta_psnr": 0.155,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 4,
+        "storm_identity": 28
+      },
+      "mask_fill_mean": 0.195,
+      "executed_frac": 0.125
+    },
+    "combat1_skip": {
+      "delta_psnr": 0.159,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 2,
+        "fullframe_dirty": 2,
+        "storm_identity": 28
+      },
+      "mask_fill_mean": 0.18,
+      "executed_frac": 0.125
+    },
+    "combat3_skip": {
+      "delta_psnr": 0.143,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 2,
+        "fullframe_dirty": 2,
+        "storm_identity": 28
+      },
+      "mask_fill_mean": 0.183,
+      "executed_frac": 0.125
+    },
+    "combat3_full": {
+      "delta_psnr": 0.143,
+      "regime": "motion",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "fullframe": 4,
+        "storm_identity": 28
+      },
+      "mask_fill_mean": 0.183,
+      "executed_frac": 0.125
+    },
+    "combat2_sv_last32": {
+      "delta_psnr": 0.0,
+      "regime": "overlay",
+      "gate_db": 0.0,
+      "gate": "pass",
+      "paths": {
+        "passthrough": 32
+      },
+      "mask_fill_mean": 0.0,
+      "executed_frac": 0.0
+    }
+  },
+  "fails": [],
+  "status": "measured"
+}
