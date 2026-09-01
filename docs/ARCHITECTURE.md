@@ -1,8 +1,9 @@
 # Architecture
 
 Two tracks share one capture contract. Neither track loads NVIDIA’s NR DLL.
-This is a research scaffold: the skip/dirty-tile runtime is real; INT8,
-INT4, 2:4 sparsity, and RTXNS are not.
+This is a research scaffold: the skip/dirty-tile runtime is real.
+INT8 QDQ is measured on a wider no-GN graph and is not the shipping
+net. INT4, 2:4 sparsity, and RTXNS are not.
 
 ```
  game (4K/DLAA, HUD off)  or  synth at 2x
@@ -91,9 +92,10 @@ Eval and `bench --data` both go through that path.
 ## INT8 / GroupNorm
 
 `ConvGN` is fine for FP16. GroupNorm quantizes poorly and tends to break
-TensorRT QDQ fusion. Preset `ampere_int8` is the same width with `norm=none`.
-`nr86 calibrate` still writes min/max JSON only. The TensorRT builder does
-not consume it. No QDQ graph, no INT4, no 2:4 sparsity.
+TensorRT QDQ fusion. Preset `probe24_int8` is base-24 with `norm=none`.
+QDQ export + a hashed TensorRT-RTX engine exist. That graph is
+timing- and quality-legal under storm-identity and is **not** the
+v0.2 product (smoke-16 GN still wins both axes). No INT4, no 2:4.
 
 ## RTXNS track
 

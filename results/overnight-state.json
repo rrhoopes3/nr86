@@ -1,25 +1,54 @@
 {
-  "purpose": "nr86 v0.1: storm-identity + quiet/motion/overlay gates",
+  "purpose": "nr86 v0.2: v0.1 net kept; probe24 INT8 considered not adopted",
   "loop": "done",
-  "loop_name": "nr86day",
+  "loop_name": "probe24int8",
   "tick": 12,
   "max_ticks": 12,
-  "next": "base24_int8_rebench_when_gpu_warm",
+  "next": "stay_v01_net",
+  "v02": "considered_not_adopted",
   "done": [
     "cold_rebench_combat",
     "quality_gate_reframe",
     "overlay_passthrough",
     "width_precision_timing_map",
-    "storm_identity_v01"
+    "storm_identity_v01",
+    "storm_identity_warm_rebench",
+    "base24_int8_rebench_when_gpu_warm",
+    "train_probe24_int8_quiet",
+    "v02_considered_not_adopted"
   ],
-  "do_not": ["ampere400", "grow_width_until_storm_identity_bench", "shrink_below_960x540", "chase_hangar_stills"],
-  "do_not_quality_claim": ["qdq_on_failed_nogn", "junk_qdq_width_probe", "post_reboot_22ms_bench"],
-  "notes": "v0.1 gate table all pass. Quiet: lobby skip +1.119, plaza +1.037. Motion by policy: look-up +0.005, yard +0.155, combat1 +0.159, combat3 +0.143. Overlay Smart Vision 0.0. Storm: enter fill>=0.05 for 3, exit fill<0.02 for 3. Post-reboot TRT bench was clock-contaminated (~22 ms); keep prior cold 6.42/8.004. Base-24 INT8 re-bench waits for a warm GPU.",
+  "do_not": [
+    "ampere400",
+    "train_probe24_fp16",
+    "shrink_below_960x540",
+    "chase_hangar_stills"
+  ],
+  "do_not_quality_claim": [
+    "qdq_on_failed_nogn",
+    "junk_qdq_width_probe",
+    "post_reboot_22ms_bench",
+    "trained_int8_12ms_identity_bench"
+  ],
+  "notes": "v0.2 ships the v0.1 city-mix smoke-16 net. probe24 INT8 (1200 steps, stopped at the bar not a plateau) is timing- and quality-legal (room2 +0.393 / plaza +0.375, QDQ +0.390 / +0.371, lobby 5.32 / combat 2.75, student p95 10.5) and loses the head-to-head (~3x worse quiet dB, slightly slower). Banked as headroom. Later: convergence-train probe24 INT8 or 9-ch temporal, not both. Do not cite 16 ms (identity 12 ms).",
   "findings": {
     "v01_room2_skip": 1.119,
     "v01_plaza": 1.037,
     "v01_combat3_skip": 0.143,
     "v01_smart_vision": 0.0,
-    "v01_fails": []
+    "v01_fails": [],
+    "smoke16_lobby_skip_ms": 4.272,
+    "smoke16_combat_skip_ms": 2.663,
+    "smoke16_identity_ms": 1.75,
+    "probe24_int8_steps": 1200,
+    "probe24_int8_room2_skip": 0.393,
+    "probe24_int8_plaza": 0.375,
+    "probe24_int8_trt_plaza": 0.371,
+    "probe24_int8_trt_room2_skip": 0.39,
+    "probe24_int8_quiet_pass": true,
+    "probe24_int8_lobby_skip_ms": 5.319,
+    "probe24_int8_combat_skip_ms": 2.754,
+    "probe24_int8_student_p95_ms": 10.53,
+    "probe24_int8_fits": true,
+    "probe24_int8_adopted": false
   }
 }

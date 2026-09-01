@@ -1,0 +1,483 @@
+{
+  "resolution": "960x540",
+  "weights": "random init, never trained",
+  "policy": "storm_identity",
+  "cells": [
+    {
+      "preset": "probe24",
+      "base": 24,
+      "levels": 3,
+      "norm": "gn",
+      "precision": "fp16",
+      "params": 432987,
+      "skip_dirty_mean_ms": 7.429,
+      "combat_skip_dirty_mean_ms": 4.419,
+      "skip_student_path_p95_ms": 15.502,
+      "combat_student_path_p95_ms": 38.107,
+      "fits_mean_8_33": true,
+      "fits_student_p95_16_67": false,
+      "binding": "lobby_skip",
+      "lobby_skip": {
+        "mean_ms": 7.429,
+        "p95_ms": 15.266,
+        "min_ms": 1.258,
+        "path_ms": {
+          "fullframe": {
+            "n": 96,
+            "mean_ms": 14.649,
+            "p95_ms": 15.399,
+            "max_ms": 17.278,
+            "min_ms": 12.948
+          },
+          "fullframe_dirty": {
+            "n": 16,
+            "mean_ms": 14.874,
+            "p95_ms": 15.562,
+            "max_ms": 15.977,
+            "min_ms": 14.044
+          },
+          "storm_identity": {
+            "n": 72,
+            "mean_ms": 1.772,
+            "p95_ms": 2.139,
+            "max_ms": 2.41,
+            "min_ms": 1.258
+          },
+          "warp_clean": {
+            "n": 72,
+            "mean_ms": 1.805,
+            "p95_ms": 2.098,
+            "max_ms": 2.337,
+            "min_ms": 1.312
+          }
+        },
+        "student_path_ms": {
+          "n": 112,
+          "mean_ms": 14.681,
+          "p95_ms": 15.502,
+          "max_ms": 17.278,
+          "min_ms": 12.948
+        },
+        "executed_frac": 0.4375,
+        "mask_fill_mean": 0.135,
+        "tiles_executed": 630,
+        "tiles_total": 1440,
+        "backend": "tensorrt_rtx",
+        "engine": "engines\\student_960x540_848a5a0dff.engine",
+        "budget": {
+          "skip_dirty_mean_ms": 8.333,
+          "student_p95_ms": 16.667,
+          "mean_applies": true,
+          "mean_pass": true,
+          "student_p95_pass": true,
+          "latency_gate": "pass"
+        },
+        "storm": true,
+        "every_n": 2,
+        "dirty_tiles": true,
+        "frames": 32
+      },
+      "combat_skip": {
+        "mean_ms": 4.419,
+        "p95_ms": 21.567,
+        "min_ms": 1.252,
+        "path_ms": {
+          "fullframe": {
+            "n": 16,
+            "mean_ms": 22.886,
+            "p95_ms": 47.76,
+            "max_ms": 64.015,
+            "min_ms": 12.087
+          },
+          "fullframe_dirty": {
+            "n": 16,
+            "mean_ms": 20.889,
+            "p95_ms": 29.444,
+            "max_ms": 33.826,
+            "min_ms": 13.271
+          },
+          "storm_identity": {
+            "n": 224,
+            "mean_ms": 1.923,
+            "p95_ms": 2.683,
+            "max_ms": 4.549,
+            "min_ms": 1.252
+          }
+        },
+        "student_path_ms": {
+          "n": 32,
+          "mean_ms": 21.887,
+          "p95_ms": 38.107,
+          "max_ms": 64.015,
+          "min_ms": 12.087
+        },
+        "executed_frac": 0.125,
+        "mask_fill_mean": 0.18,
+        "tiles_executed": 180,
+        "tiles_total": 1440,
+        "backend": "tensorrt_rtx",
+        "engine": "engines\\student_960x540_848a5a0dff.engine",
+        "budget": {
+          "skip_dirty_mean_ms": 8.333,
+          "student_p95_ms": 16.667,
+          "mean_applies": true,
+          "mean_pass": true,
+          "student_p95_pass": false,
+          "latency_gate": "fail: skip+dirty mean 4.419 vs 8.333 pass; student-path p95 38.107 vs 16.667 fail"
+        },
+        "storm": true,
+        "every_n": 2,
+        "dirty_tiles": true,
+        "frames": 32
+      },
+      "note": "junk weights, timing only. Binding is worst skip+dirty mean under storm-identity \u2014 not all-dirty combat student."
+    },
+    {
+      "preset": "probe24_int8",
+      "base": 24,
+      "levels": 3,
+      "norm": "none",
+      "precision": "int8_qdq",
+      "params": 432315,
+      "skip_dirty_mean_ms": 5.811,
+      "combat_skip_dirty_mean_ms": 3.104,
+      "skip_student_path_p95_ms": 11.888,
+      "combat_student_path_p95_ms": 18.35,
+      "fits_mean_8_33": true,
+      "fits_student_p95_16_67": false,
+      "binding": "lobby_skip",
+      "lobby_skip": {
+        "mean_ms": 5.811,
+        "p95_ms": 11.571,
+        "min_ms": 1.295,
+        "path_ms": {
+          "fullframe": {
+            "n": 96,
+            "mean_ms": 10.968,
+            "p95_ms": 11.893,
+            "max_ms": 12.381,
+            "min_ms": 9.874
+          },
+          "fullframe_dirty": {
+            "n": 16,
+            "mean_ms": 11.128,
+            "p95_ms": 11.553,
+            "max_ms": 11.571,
+            "min_ms": 10.459
+          },
+          "storm_identity": {
+            "n": 72,
+            "mean_ms": 1.78,
+            "p95_ms": 2.242,
+            "max_ms": 2.361,
+            "min_ms": 1.295
+          },
+          "warp_clean": {
+            "n": 72,
+            "mean_ms": 1.785,
+            "p95_ms": 2.195,
+            "max_ms": 2.431,
+            "min_ms": 1.297
+          }
+        },
+        "student_path_ms": {
+          "n": 112,
+          "mean_ms": 10.991,
+          "p95_ms": 11.888,
+          "max_ms": 12.381,
+          "min_ms": 9.874
+        },
+        "executed_frac": 0.4375,
+        "mask_fill_mean": 0.135,
+        "tiles_executed": 630,
+        "tiles_total": 1440,
+        "backend": "tensorrt_rtx_int8",
+        "engine": "engines\\student_960x540_e7420e850f_int8.engine",
+        "budget": {
+          "skip_dirty_mean_ms": 8.333,
+          "student_p95_ms": 16.667,
+          "mean_applies": true,
+          "mean_pass": true,
+          "student_p95_pass": true,
+          "latency_gate": "pass"
+        },
+        "storm": true,
+        "every_n": 2,
+        "dirty_tiles": true,
+        "frames": 32
+      },
+      "combat_skip": {
+        "mean_ms": 3.104,
+        "p95_ms": 10.82,
+        "min_ms": 1.247,
+        "path_ms": {
+          "fullframe": {
+            "n": 16,
+            "mean_ms": 10.855,
+            "p95_ms": 12.172,
+            "max_ms": 14.135,
+            "min_ms": 9.356
+          },
+          "fullframe_dirty": {
+            "n": 16,
+            "mean_ms": 13.262,
+            "p95_ms": 19.493,
+            "max_ms": 20.566,
+            "min_ms": 9.651
+          },
+          "storm_identity": {
+            "n": 224,
+            "mean_ms": 1.825,
+            "p95_ms": 2.352,
+            "max_ms": 2.936,
+            "min_ms": 1.247
+          }
+        },
+        "student_path_ms": {
+          "n": 32,
+          "mean_ms": 12.058,
+          "p95_ms": 18.35,
+          "max_ms": 20.566,
+          "min_ms": 9.356
+        },
+        "executed_frac": 0.125,
+        "mask_fill_mean": 0.18,
+        "tiles_executed": 180,
+        "tiles_total": 1440,
+        "backend": "tensorrt_rtx_int8",
+        "engine": "engines\\student_960x540_e7420e850f_int8.engine",
+        "budget": {
+          "skip_dirty_mean_ms": 8.333,
+          "student_p95_ms": 16.667,
+          "mean_applies": true,
+          "mean_pass": true,
+          "student_p95_pass": false,
+          "latency_gate": "fail: skip+dirty mean 3.104 vs 8.333 pass; student-path p95 18.35 vs 16.667 fail"
+        },
+        "storm": true,
+        "every_n": 2,
+        "dirty_tiles": true,
+        "frames": 32
+      },
+      "note": "junk weights, timing only. Binding is worst skip+dirty mean under storm-identity \u2014 not all-dirty combat student."
+    }
+  ],
+  "affordable_under_8_33_16_67": [
+    "probe24_int8"
+  ],
+  "clocks_after": {
+    "temp_c": 73.0,
+    "power_w": 202.33,
+    "clock_graphics_mhz": 1065.0,
+    "clock_sm_mhz": 1065.0,
+    "util_pct": 74.0,
+    "mem_mb": 3015.0
+  },
+  "do_not": [
+    "ampere400",
+    "shrink_below_960x540"
+  ],
+  "do_not_quality_claim": [
+    "junk_qdq_width_probe"
+  ],
+  "status": "done",
+  "lesson": "First combat pass after engine build was JIT/clock poison (64 ms). JIT-hot second pass is the timing claim. probe24 FP16 lobby is legal (mean 6.98, student p95 14.3) but combat enter-ramp dirty still spikes (student p95 31). probe24 INT8 passes both clips (lobby mean 5.53, student p95 11.2 / combat 10.8). INT8 pays at base-24. This is not a quality claim — junk weights, norm=none for QDQ.",
+  "next": "train_probe24_int8_against_quiet_0.25_if_go",
+  "second_pass_jit_hot": {
+    "pass": "jit_hot_second_pass",
+    "cells": [
+      {
+        "preset": "probe24",
+        "precision": "fp16",
+        "skip_dirty_mean_ms": 6.978,
+        "combat_skip_dirty_mean_ms": 3.531,
+        "skip_student_path_p95_ms": 14.3,
+        "combat_student_path_p95_ms": 31.258,
+        "lobby_student_path_ms": {
+          "n": 112,
+          "mean_ms": 13.665,
+          "p95_ms": 14.3,
+          "max_ms": 14.923,
+          "min_ms": 12.365
+        },
+        "combat_student_path_ms": {
+          "n": 32,
+          "mean_ms": 15.856,
+          "p95_ms": 31.258,
+          "max_ms": 42.789,
+          "min_ms": 11.459
+        },
+        "lobby_path_ms": {
+          "fullframe": {
+            "n": 96,
+            "mean_ms": 13.642,
+            "p95_ms": 14.3,
+            "max_ms": 14.923,
+            "min_ms": 12.365
+          },
+          "fullframe_dirty": {
+            "n": 16,
+            "mean_ms": 13.804,
+            "p95_ms": 14.208,
+            "max_ms": 14.433,
+            "min_ms": 12.994
+          },
+          "storm_identity": {
+            "n": 72,
+            "mean_ms": 1.776,
+            "p95_ms": 2.156,
+            "max_ms": 2.239,
+            "min_ms": 1.507
+          },
+          "warp_clean": {
+            "n": 72,
+            "mean_ms": 1.776,
+            "p95_ms": 2.219,
+            "max_ms": 2.671,
+            "min_ms": 1.233
+          }
+        },
+        "combat_path_ms": {
+          "fullframe": {
+            "n": 16,
+            "mean_ms": 13.727,
+            "p95_ms": 15.176,
+            "max_ms": 26.949,
+            "min_ms": 11.459
+          },
+          "fullframe_dirty": {
+            "n": 16,
+            "mean_ms": 17.985,
+            "p95_ms": 34.515,
+            "max_ms": 42.789,
+            "min_ms": 12.548
+          },
+          "storm_identity": {
+            "n": 224,
+            "mean_ms": 1.77,
+            "p95_ms": 2.295,
+            "max_ms": 3.206,
+            "min_ms": 1.235
+          }
+        },
+        "fits_mean_8_33": true,
+        "fits_student_p95_16_67": false,
+        "binding": "lobby_skip",
+        "lobby_gate": {
+          "skip_dirty_mean_ms": 8.333,
+          "student_p95_ms": 16.667,
+          "mean_applies": true,
+          "mean_pass": true,
+          "student_p95_pass": true,
+          "latency_gate": "pass"
+        },
+        "combat_gate": {
+          "skip_dirty_mean_ms": 8.333,
+          "student_p95_ms": 16.667,
+          "mean_applies": true,
+          "mean_pass": true,
+          "student_p95_pass": false,
+          "latency_gate": "fail: skip+dirty mean 3.531 vs 8.333 pass; student-path p95 31.258 vs 16.667 fail"
+        }
+      },
+      {
+        "preset": "probe24_int8",
+        "precision": "int8_qdq",
+        "skip_dirty_mean_ms": 5.526,
+        "combat_skip_dirty_mean_ms": 2.793,
+        "skip_student_path_p95_ms": 11.161,
+        "combat_student_path_p95_ms": 10.776,
+        "lobby_student_path_ms": {
+          "n": 112,
+          "mean_ms": 10.4,
+          "p95_ms": 11.161,
+          "max_ms": 11.634,
+          "min_ms": 9.274
+        },
+        "combat_student_path_ms": {
+          "n": 32,
+          "mean_ms": 9.683,
+          "p95_ms": 10.776,
+          "max_ms": 11.671,
+          "min_ms": 8.396
+        },
+        "lobby_path_ms": {
+          "fullframe": {
+            "n": 96,
+            "mean_ms": 10.378,
+            "p95_ms": 11.161,
+            "max_ms": 11.634,
+            "min_ms": 9.274
+          },
+          "fullframe_dirty": {
+            "n": 16,
+            "mean_ms": 10.529,
+            "p95_ms": 10.981,
+            "max_ms": 11.189,
+            "min_ms": 10.036
+          },
+          "storm_identity": {
+            "n": 72,
+            "mean_ms": 1.753,
+            "p95_ms": 2.139,
+            "max_ms": 2.28,
+            "min_ms": 1.297
+          },
+          "warp_clean": {
+            "n": 72,
+            "mean_ms": 1.718,
+            "p95_ms": 2.096,
+            "max_ms": 2.502,
+            "min_ms": 1.299
+          }
+        },
+        "combat_path_ms": {
+          "fullframe": {
+            "n": 16,
+            "mean_ms": 9.274,
+            "p95_ms": 9.902,
+            "max_ms": 10.125,
+            "min_ms": 8.396
+          },
+          "fullframe_dirty": {
+            "n": 16,
+            "mean_ms": 10.092,
+            "p95_ms": 11.392,
+            "max_ms": 11.671,
+            "min_ms": 9.136
+          },
+          "storm_identity": {
+            "n": 224,
+            "mean_ms": 1.809,
+            "p95_ms": 2.346,
+            "max_ms": 2.633,
+            "min_ms": 1.239
+          }
+        },
+        "fits_mean_8_33": true,
+        "fits_student_p95_16_67": true,
+        "binding": "lobby_skip",
+        "lobby_gate": {
+          "skip_dirty_mean_ms": 8.333,
+          "student_p95_ms": 16.667,
+          "mean_applies": true,
+          "mean_pass": true,
+          "student_p95_pass": true,
+          "latency_gate": "pass"
+        },
+        "combat_gate": {
+          "skip_dirty_mean_ms": 8.333,
+          "student_p95_ms": 16.667,
+          "mean_applies": true,
+          "mean_pass": true,
+          "student_p95_pass": true,
+          "latency_gate": "pass"
+        }
+      }
+    ],
+    "affordable_under_8_33_16_67": [
+      "probe24_int8"
+    ],
+    "clocks_after": "1440 MHz, 226.96 W, 74, 68 %"
+  }
+}

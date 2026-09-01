@@ -82,9 +82,13 @@ Run in order. Stop at the first fail.
    hides 11 ms dirty spikes is not a pass. Then
    `eval --every-n 2 --dirty-tiles --ablate …`.
 6. **Ampere student + INT8** — only after 3–5. Storm-identity
-   removes all-dirty combat from the student worst case. A wider
-   INT8 graph may now fit; that is a junk-weight bench, not a
-   training run. INT4 / 2:4 stay postponed.
+   removes all-dirty combat from the student worst case. The
+   junk-weight map plus a quiet train (`scripts/train_probe24_int8.py`)
+   showed **probe24 INT8 is gate-legal** (quiet +0.39 / +0.37, lobby
+   skip 5.32 ms, student p95 10.5). It still loses the head-to-head
+   to smoke-16 FP16 (+1.12 / +1.04, 4.27 / 2.66 ms), so v0.2 does
+   not adopt it. INT4 / 2:4 stay postponed. Do not cite a bench
+   whose identity path is ~12 ms (clocks).
 
 ## What not to compare against
 

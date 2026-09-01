@@ -1,0 +1,277 @@
+{
+  "scene": "warm-GPU storm-identity TRT re-bench (dxhr closed)",
+  "ckpt": "B:\\Rando Apps\\Nvda DLSS5 workaround\\runs\\dxhr-depth-smoke-q540\\student_best.pt",
+  "engine": "B:\\Rando Apps\\Nvda DLSS5 workaround\\engines\\student_960x540_1ae115ab73.engine",
+  "dxhr_open_during_bench": false,
+  "clocks_before_prime": {
+    "temp_c": 68.0,
+    "power_w": 124.31,
+    "clock_graphics_mhz": 210.0,
+    "clock_sm_mhz": 210.0,
+    "util_pct": 31.0,
+    "mem_mb": 2268.0
+  },
+  "clocks_after_prime": {
+    "temp_c": 69.0,
+    "power_w": 124.03,
+    "clock_graphics_mhz": 1695.0,
+    "clock_sm_mhz": 1695.0,
+    "util_pct": 28.0,
+    "mem_mb": 2591.0
+  },
+  "clocks_after_smoke": {
+    "temp_c": 73.0,
+    "power_w": 234.04,
+    "clock_graphics_mhz": 1230.0,
+    "clock_sm_mhz": 1230.0,
+    "util_pct": 67.0,
+    "mem_mb": 3011.0
+  },
+  "reference_cold_all_dirty": {
+    "lobby_skip_dirty_mean_ms": 6.42,
+    "combat_skip_dirty_mean_ms": 8.004,
+    "note": "Pre-v0.1; combat ran the student every dirty frame."
+  },
+  "lobby_skip": {
+    "mean_ms": 4.272,
+    "p95_ms": 7.944,
+    "min_ms": 1.204,
+    "path_ms": {
+      "fullframe": {
+        "n": 96,
+        "mean_ms": 7.498,
+        "p95_ms": 8.143,
+        "max_ms": 8.629,
+        "min_ms": 6.331
+      },
+      "fullframe_dirty": {
+        "n": 16,
+        "mean_ms": 7.55,
+        "p95_ms": 8.166,
+        "max_ms": 8.272,
+        "min_ms": 6.836
+      },
+      "storm_identity": {
+        "n": 72,
+        "mean_ms": 1.745,
+        "p95_ms": 2.187,
+        "max_ms": 2.261,
+        "min_ms": 1.204
+      },
+      "warp_clean": {
+        "n": 72,
+        "mean_ms": 1.769,
+        "p95_ms": 2.217,
+        "max_ms": 2.29,
+        "min_ms": 1.308
+      }
+    },
+    "student_path_ms": {
+      "n": 112,
+      "mean_ms": 7.505,
+      "p95_ms": 8.166,
+      "max_ms": 8.629,
+      "min_ms": 6.331
+    },
+    "executed_frac": 0.4375,
+    "mask_fill_mean": 0.135,
+    "tiles_executed": 630,
+    "tiles_total": 1440,
+    "backend": "tensorrt_rtx",
+    "engine": "B:\\Rando Apps\\Nvda DLSS5 workaround\\engines\\student_960x540_1ae115ab73.engine",
+    "budget": {
+      "skip_dirty_mean_ms": 8.333,
+      "student_p95_ms": 16.667,
+      "mean_applies": true,
+      "mean_pass": true,
+      "student_p95_pass": true,
+      "latency_gate": "pass"
+    },
+    "storm": true,
+    "every_n": 2,
+    "dirty_tiles": true,
+    "frames": 32
+  },
+  "combat_skip": {
+    "mean_ms": 2.663,
+    "p95_ms": 7.898,
+    "min_ms": 1.263,
+    "path_ms": {
+      "fullframe": {
+        "n": 16,
+        "mean_ms": 7.513,
+        "p95_ms": 8.354,
+        "max_ms": 9.188,
+        "min_ms": 6.551
+      },
+      "fullframe_dirty": {
+        "n": 16,
+        "mean_ms": 8.126,
+        "p95_ms": 9.105,
+        "max_ms": 13.529,
+        "min_ms": 6.779
+      },
+      "storm_identity": {
+        "n": 224,
+        "mean_ms": 1.927,
+        "p95_ms": 2.574,
+        "max_ms": 13.282,
+        "min_ms": 1.263
+      }
+    },
+    "student_path_ms": {
+      "n": 32,
+      "mean_ms": 7.819,
+      "p95_ms": 9.105,
+      "max_ms": 13.529,
+      "min_ms": 6.551
+    },
+    "executed_frac": 0.125,
+    "mask_fill_mean": 0.18,
+    "tiles_executed": 180,
+    "tiles_total": 1440,
+    "backend": "tensorrt_rtx",
+    "engine": "B:\\Rando Apps\\Nvda DLSS5 workaround\\engines\\student_960x540_1ae115ab73.engine",
+    "budget": {
+      "skip_dirty_mean_ms": 8.333,
+      "student_p95_ms": 16.667,
+      "mean_applies": true,
+      "mean_pass": true,
+      "student_p95_pass": true,
+      "latency_gate": "pass"
+    },
+    "storm": true,
+    "every_n": 2,
+    "dirty_tiles": true,
+    "frames": 32
+  },
+  "lobby_every_n_1": {
+    "mean_ms": 5.974,
+    "p95_ms": 8.252,
+    "min_ms": 1.299,
+    "path_ms": {
+      "fullframe": {
+        "n": 184,
+        "mean_ms": 7.616,
+        "p95_ms": 8.294,
+        "max_ms": 8.797,
+        "min_ms": 6.681
+      },
+      "storm_identity": {
+        "n": 72,
+        "mean_ms": 1.777,
+        "p95_ms": 2.284,
+        "max_ms": 2.552,
+        "min_ms": 1.299
+      }
+    },
+    "student_path_ms": {
+      "n": 184,
+      "mean_ms": 7.616,
+      "p95_ms": 8.294,
+      "max_ms": 8.797,
+      "min_ms": 6.681
+    },
+    "executed_frac": 0.7188,
+    "mask_fill_mean": 0.135,
+    "tiles_executed": 1035,
+    "tiles_total": 1440,
+    "backend": "tensorrt_rtx",
+    "engine": "B:\\Rando Apps\\Nvda DLSS5 workaround\\engines\\student_960x540_1ae115ab73.engine",
+    "budget": {
+      "skip_dirty_mean_ms": 8.333,
+      "student_p95_ms": 16.667,
+      "mean_applies": false,
+      "mean_pass": null,
+      "student_p95_pass": true,
+      "latency_gate": "pass"
+    },
+    "storm": true,
+    "every_n": 1,
+    "dirty_tiles": false,
+    "frames": 32
+  },
+  "combat_every_n_1": {
+    "mean_ms": 2.488,
+    "p95_ms": 7.455,
+    "min_ms": 1.285,
+    "path_ms": {
+      "fullframe": {
+        "n": 32,
+        "mean_ms": 7.422,
+        "p95_ms": 7.999,
+        "max_ms": 8.562,
+        "min_ms": 6.123
+      },
+      "storm_identity": {
+        "n": 224,
+        "mean_ms": 1.783,
+        "p95_ms": 2.251,
+        "max_ms": 2.557,
+        "min_ms": 1.285
+      }
+    },
+    "student_path_ms": {
+      "n": 32,
+      "mean_ms": 7.422,
+      "p95_ms": 7.999,
+      "max_ms": 8.562,
+      "min_ms": 6.123
+    },
+    "executed_frac": 0.125,
+    "mask_fill_mean": 0.18,
+    "tiles_executed": 180,
+    "tiles_total": 1440,
+    "backend": "tensorrt_rtx",
+    "engine": "B:\\Rando Apps\\Nvda DLSS5 workaround\\engines\\student_960x540_1ae115ab73.engine",
+    "budget": {
+      "skip_dirty_mean_ms": 8.333,
+      "student_p95_ms": 16.667,
+      "mean_applies": false,
+      "mean_pass": null,
+      "student_p95_pass": true,
+      "latency_gate": "pass"
+    },
+    "storm": true,
+    "every_n": 1,
+    "dirty_tiles": false,
+    "frames": 32
+  },
+  "identity_paths": {
+    "lobby_skip": {
+      "storm_identity": {
+        "n": 72,
+        "mean_ms": 1.745,
+        "p95_ms": 2.187,
+        "max_ms": 2.261,
+        "min_ms": 1.204
+      },
+      "warp_clean": {
+        "n": 72,
+        "mean_ms": 1.769,
+        "p95_ms": 2.217,
+        "max_ms": 2.29,
+        "min_ms": 1.308
+      }
+    },
+    "combat_skip": {
+      "storm_identity": {
+        "n": 224,
+        "mean_ms": 1.927,
+        "p95_ms": 2.574,
+        "max_ms": 13.282,
+        "min_ms": 1.263
+      }
+    }
+  },
+  "honest_clocks": true,
+  "honest_rule": "lobby skip+dirty mean <= 12.0 (contaminated class was ~22 ms)",
+  "do_not_quality_claim": [
+    "post_reboot_22ms_bench"
+  ],
+  "do_not": [
+    "ampere400",
+    "shrink_below_960x540"
+  ],
+  "lesson": "Lobby skip 4.272 vs cold 6.42. Combat skip 2.663 vs cold all-dirty 8.004. Storm-identity should make combat cheaper if identity is not 17 ms class."
+}

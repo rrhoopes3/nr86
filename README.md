@@ -1,13 +1,12 @@
 # nr86
 
-**v0.1** — measured, gated, weights-owned Ampere student. Not a DLSS
-DLL drop. Not a 720p product. Not INT8 yet.
+**v0.2** — same shipping net as v0.1. probe24 INT8 is legal, not adopted.
 
 The hardware thesis is still the right one: a 3090 has no FP8 MMA. The
 leaked DLSS 5 Neural Rendering path is an FP8 teacher JIT-compiled as
 FP16. This repo is the other job — a student *you own*, at Quality-input
 size, with a mask and every-Nth reuse, aimed at 3rd-gen tensor cores.
-INT8 / INT4 / 2:4 sparsity are **roadmap**, not implementation.
+INT8 is a measured headroom lever, not the product. INT4 / 2:4 stay postponed.
 
 ## What you get today
 
@@ -19,9 +18,9 @@ INT8 / INT4 / 2:4 sparsity are **roadmap**, not implementation.
 | PSNR/SSIM eval vs teacher **and** identity | working (`nr86 eval`, `--use-trt`, `--offset`) |
 | Residual-after-warp mask; skip + dirty tiles; storm-identity | working — v0.1 policy |
 | Placement: average **and** worst-case | **cost model**, not measured |
-| Residual UNet (`gn` FP16 / `smoke_int8` is same width, `norm=none`) | working — smoke only |
+| Residual UNet (`gn` FP16 / `probe24_int8` is base-24, `norm=none`) | working — **ship smoke GN** |
 | TensorRT-RTX FP16 student in `run_frame` | working on this 3090 |
-| INT8 QDQ export + hashed TRT engine | working — not a win yet (see `results/dxhr-q540-int8.json`) |
+| INT8 QDQ export + hashed TRT engine | working — probe24 INT8 is gate-legal, not better (see below) |
 | INT4 / 2:4 / RTXNS | **not implemented** |
 
 Pulled in as git submodules / vendored headers (open or official only):
@@ -33,12 +32,15 @@ Pulled in as git submodules / vendored headers (open or official only):
 Not pulled: leaked `nvngx_dlssnr.dll`, Discord Ampere addons, DLSS5-Feeder, OptiScaler.
 See [LEGAL.md](LEGAL.md).
 
-## v0.1 on this 3090 (honest)
+## v0.2 on this 3090 (honest)
 
-Shipping graph: **smoke 193k GN, 960×540**, city-mix weights
+Shipping graph is still **smoke 193k GN, 960×540**, city-mix weights
 (`runs/dxhr-city-mix/student_best.pt`). Storm-identity after 3 frames
 with residual fill ≥ 0.05; exit when fill < 0.02 for 3 frames. Overlay
 pass-through when color stats leave the training envelope.
+
+v0.2 does **not** switch to probe24. That net cleared the bars and
+lost the head-to-head.
 
 | Scene | Path | ΔPSNR | Regime | Gate |
 | --- | --- | --- | --- | --- |
@@ -50,11 +52,13 @@ pass-through when color stats leave the training envelope.
 | Unseen combat3 | skip+dirty | **+0.143** | motion 0.0 policy | pass |
 | Smart Vision last32 | full | **0.000** | overlay 0.0 policy | pass |
 
-Latency **cold** (dxhr.exe closed), 960×540 TRT FP16, skip+dirty:
-lobby mean was **6.42 ms** / combat all-dirty **8.004 ms** before
-storm-identity. Student-path p95 is `fullframe` + `fullframe_dirty`
-only. Game-open every-n=1 ~11.4 ms is clocks. 720p still misses
-8.33/16.67 — v0.1 is the 540p student, not the product tensor.
+Latency **warm, storm-identity, dxhr.exe closed**, 960×540 TRT FP16
+skip+dirty: lobby **4.27 ms** / combat **2.66 ms**. Identity ~1.8 ms.
+Student-path p95 is `fullframe` + `fullframe_dirty` only. Pre-policy
+cold all-dirty combat was 8.004 ms. Game-open every-n=1 ~11.4 ms is
+clocks. Do not cite post-reboot ~22 ms or the 16 ms probe24 bench
+(identity was 12 ms). 720p still misses 8.33/16.67 — this is the
+540p student, not the product tensor.
 
 Synth +3.58 dB / 6.48 ms remains a synth number. ~13× is a cost model.
 Do not quote CLI TRT times as a full H2D+compute pass.
@@ -92,9 +96,8 @@ latency gate on 1280×720.
 
 24 GB VRAM is the one thing that does not suck: a 148M teacher plus
 activations fits. Distilling a 20–40M student on one 3090 is a week, not a
-cluster. The smoke preset is minutes. **Do not train wider until a
-storm-identity timing map says the ms fit.** Quiet ≥ +0.25 measured;
-storms and overlays are 0.0 by policy. Latency cold, 960×540.
+cluster. The smoke preset is minutes. Quiet ≥ +0.25 measured; storms
+and overlays are 0.0 by policy. Latency warm, game closed, 960×540.
 
 ## Repo layout
 
@@ -106,12 +109,33 @@ third_party/          TensorRT-RTX, RTXNS, ReShade headers
 docs/                 architecture + measurement protocol
 ```
 
+## probe24 INT8 (considered, not adopted)
+
+`scripts/train_probe24_int8.py` trained no-GN base-24 from scratch on
+lobby + hold-out 105. Plaza stayed unseen. Stopped at 1200 steps
+because the quiet bar passed and confirmed, not because it plateaued.
+
+| | v0.1 smoke-16 FP16 | probe24 INT8 |
+| --- | --- | --- |
+| Lobby skip Δ | **+1.12 dB** | +0.39 dB |
+| Unseen plaza Δ | **+1.04 dB** | +0.375 dB |
+| Lobby skip ms | **4.27** | 5.32 |
+| Combat skip ms | **2.66** | 2.75 |
+| Quiet ≥ +0.25 | pass | pass |
+| 8.33 / 16.67 | pass | pass (student p95 10.5) |
+
+QDQ kept the quality (plaza +0.371 / lobby +0.390). Width + INT8 is
+therefore **legal**. It is also ~3× worse on quiet dB and slightly
+slower, so it is not the product. Results:
+`results/dxhr-q540-probe24-int8.json`,
+`results/dxhr-q540-storm-identity-latency.json`,
+`results/dxhr-q540-width-storm.json`.
+
 ## Next
 
-v0.1 is the 193k student with storm-identity. Next is a **junk-weight
-base-24 INT8 re-bench** under that policy (quiet-scene mean, not
-all-dirty combat). Train wider only if that envelope says yes.
-Temporal (9-ch warped_out) stays optional and composes under the
-identity floor.
+The v0.2 call is resolved: **keep the v0.1 net**. Later quality
+levers (pick one, not both): a probe24 INT8 *convergence* run
+(stop when gains flatten, not at the bar) or the 9-ch temporal
+student. Do not train `probe24` FP16.
 
 Do not put this on multiplayer.
